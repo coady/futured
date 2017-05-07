@@ -1,8 +1,9 @@
 import asyncio
+import subprocess
 import time
 from concurrent import futures
 import pytest
-from futured import futured, threaded, processed, asynced
+from futured import futured, threaded, processed, asynced, command
 
 delays = [0.2, 0.1, 0.0]
 
@@ -36,3 +37,12 @@ def test_map():
         assert timer(coro.map(delays, timeout=None)) == sorted(delays)
         with pytest.raises(futures.TimeoutError):
             list(coro.map(delays, timeout=0))
+
+
+def test_subprocess():
+    sleep = futured(command, 'sleep')
+    assert timer(sleep.map(map(str, delays))) == [b''] * len(delays)
+    with pytest.raises(subprocess.CalledProcessError):
+        sleep().result()
+    with pytest.raises(subprocess.TimeoutExpired):
+        sleep('1').result(timeout=0)

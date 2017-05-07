@@ -1,5 +1,6 @@
 import asyncio
 import operator
+import subprocess
 from concurrent import futures
 from functools import partial
 
@@ -48,3 +49,15 @@ class asynced(futured):
         if kwargs:
             fs = asyncio.as_completed(fs, loop=loop, **kwargs)
         return map(loop.run_until_complete, fs)
+
+
+class command(subprocess.Popen):
+    """Asynchronous subprocess with a future compatible interface."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+
+    def result(self, **kwargs):
+        stdout, stderr = self.communicate(**kwargs)
+        if self.returncode:
+            raise subprocess.CalledProcessError(self.returncode, self.args, stdout, stderr)
+        return stdout

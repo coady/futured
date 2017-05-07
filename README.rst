@@ -1,11 +1,11 @@
-.. .. image:: https://img.shields.io/pypi/v/futured.svg
-..    :target: https://pypi.python.org/pypi/futured/
-.. .. image:: https://img.shields.io/pypi/pyversions/futured.svg
-.. .. image:: https://img.shields.io/pypi/status/futured.svg
-.. .. image:: https://img.shields.io/travis/coady/futured.svg
-..    :target: https://travis-ci.org/coady/futured
-.. .. image:: https://img.shields.io/codecov/c/github/coady/futured.svg
-..    :target: https://codecov.io/github/coady/futured
+.. image:: https://img.shields.io/pypi/v/futured.svg
+   :target: https://pypi.python.org/pypi/futured/
+.. image:: https://img.shields.io/pypi/pyversions/futured.svg
+.. image:: https://img.shields.io/pypi/status/futured.svg
+.. image:: https://img.shields.io/travis/coady/futured.svg
+   :target: https://travis-ci.org/coady/futured
+.. image:: https://img.shields.io/codecov/c/github/coady/futured.svg
+   :target: https://codecov.io/github/coady/futured
 
 Futured provides a simple consistent interface for concurrent functional programming in Python.
 It can wrap any callable to return ``concurrent.futures.Future`` objects,
@@ -50,6 +50,15 @@ The same interface works for ``aynscio``.
    import aiohttp
 
    fetch = asynced(aiohttp.ClientSession().get)
+
+``command`` wraps ``subprocess.Popen`` to provide a ``Future`` compatible interface.
+
+.. code-block:: python
+
+   from futured import futured, command
+
+   command('ls').result()  # returns stdout or raises stderr
+   futured(command, 'ls')
 
 Installation
 =========================
