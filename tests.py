@@ -46,3 +46,4 @@ def test_subprocess():
         sleep().result()
     with pytest.raises(subprocess.TimeoutExpired):
         sleep('1').result(timeout=0)
+    assert int(command('ls').pipe('wc', '-l').result().strip())

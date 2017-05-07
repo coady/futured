@@ -58,6 +58,7 @@ The same interface works for ``aynscio``.
    from futured import futured, command
 
    command('ls').result()  # returns stdout or raises stderr
+   command('ls').pipe('wc')  # pipes into next command
    futured(command, 'ls')
 
 Installation

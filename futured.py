@@ -57,7 +57,12 @@ class command(subprocess.Popen):
         super().__init__(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
 
     def result(self, **kwargs):
+        """Return stdout or raise stderr."""
         stdout, stderr = self.communicate(**kwargs)
         if self.returncode:
             raise subprocess.CalledProcessError(self.returncode, self.args, stdout, stderr)
         return stdout
+
+    def pipe(self, *args, **kwargs):
+        """Pipe stdout to the next command's stdin."""
+        return type(self)(*args, stdin=self.stdout, **kwargs)
