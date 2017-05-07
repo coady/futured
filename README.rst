@@ -59,6 +59,8 @@ The same interface works for ``aynscio``.
 
    command('ls').result()  # returns stdout or raises stderr
    command('ls').pipe('wc')  # pipes into next command
+   for line in command('ls'):  # iterable lines
+
    futured(command, 'ls')
 
 Installation

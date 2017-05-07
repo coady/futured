@@ -66,3 +66,6 @@ class command(subprocess.Popen):
     def pipe(self, *args, **kwargs):
         """Pipe stdout to the next command's stdin."""
         return type(self)(*args, stdin=self.stdout, **kwargs)
+
+    def __iter__(self):
+        return iter(self.result().splitlines())
