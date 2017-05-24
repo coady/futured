@@ -1,9 +1,10 @@
 import asyncio
+import os
 import subprocess
 import time
 from concurrent import futures
 import pytest
-from futured import futured, threaded, processed, asynced, command
+from futured import futured, threaded, processed, asynced, command, forked
 
 delays = [0.2, 0.1, 0.0]
 
@@ -48,3 +49,14 @@ def test_subprocess():
         sleep('1').result(timeout=0)
     count = int(command('ls').pipe('wc', '-l').result().strip())
     assert count and count == len(list(command('ls')))
+
+
+def test_forked():
+    for index, delay in enumerate(forked(delays)):
+        assert index == 0
+        time.sleep(delay)
+    with pytest.raises(UnboundLocalError):
+        index
+    with pytest.raises(OSError):
+        for delay in forked(delays):
+            os._exit(bool(delay))

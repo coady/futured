@@ -1,5 +1,6 @@
 import asyncio
 import operator
+import os
 import subprocess
 from concurrent import futures
 from functools import partial
@@ -69,3 +70,19 @@ class command(subprocess.Popen):
 
     def __iter__(self):
         return iter(self.result().splitlines())
+
+
+def forked(values):
+    """Generate each value in its own child process and wait in the parent."""
+    procs = []
+    for value in values:
+        pid = os.fork()
+        if pid:
+            procs.append((pid, value))
+        else:  # pragma: no cover
+            yield value
+            os._exit(0)
+    for pid, value in procs:
+        pid, status = os.waitpid(pid, 0)
+        if status:
+            raise OSError(status, value)

@@ -63,6 +63,16 @@ The same interface works for ``aynscio``.
 
    futured(command, 'ls')
 
+``forked`` allows iteration in separate child processes.
+
+.. code-block:: python
+
+   from futured import forked
+
+   for value in forked(values):
+      # in a child process
+   # in parent after children have exited
+
 Installation
 =========================
 ::
