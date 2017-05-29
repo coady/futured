@@ -27,6 +27,16 @@ def asleep(delay):
     return asyncio.sleep(delay, result=delay)
 
 
+class wrapper:
+    @threaded
+    def method(self):
+        pass
+
+
+def test_class():
+    assert wrapper().method().result() is None
+
+
 def test_results():
     assert next(futured.results([threaded(sleep)(0)])) == 0
     assert next(asynced.results([asleep(0)])) == 0

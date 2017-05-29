@@ -2,6 +2,7 @@ import asyncio
 import operator
 import os
 import subprocess
+import types
 from concurrent import futures
 from functools import partial
 
@@ -10,6 +11,9 @@ __version__ = '0.0'
 
 class futured(partial):
     """A partial function which returns futures."""
+    def __get__(self, instance, owner):
+        return self if instance is None else types.MethodType(self, instance)
+
     @staticmethod
     def results(fs, **kwargs):
         """Generate results concurrently from futures, by default in order.
