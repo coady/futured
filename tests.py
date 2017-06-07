@@ -37,6 +37,13 @@ def test_class():
     assert wrapper().method().result() is None
 
 
+def test_executors():
+    for executed in (threaded, processed):
+        executor = executed(max_workers=1)
+        assert executor._max_workers == 1
+        assert executor(sleep).func.__self__ is executor
+
+
 def test_results():
     assert next(futured.results([threaded(sleep)(0)])) == 0
     assert next(asynced.results([asleep(0)])) == 0

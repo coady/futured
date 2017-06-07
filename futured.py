@@ -34,14 +34,20 @@ class futured(partial):
         return self.results(map(self, *iterables), **kwargs)
 
 
-def threaded(func, *args, **kwargs):
-    """A partial function executed in a thread."""
-    return futured(futures.ThreadPoolExecutor().submit, func, *args, **kwargs)
+class executed:
+    def __new__(cls, *args, **kwargs):
+        return cls()(*args, **kwargs) if args else object.__new__(cls)
+
+    def __call__(self, func, *args, **kwargs):
+        return futured(self.submit, func, *args, **kwargs)
 
 
-def processed(func, *args, **kwargs):
-    """A partial function executed in a process."""
-    return futured(futures.ProcessPoolExecutor().submit, func, *args, **kwargs)
+class threaded(executed, futures.ThreadPoolExecutor):
+    """A partial function executed in its own thread pool."""
+
+
+class processed(executed, futures.ProcessPoolExecutor):
+    """A partial function executed in its own process pool."""
 
 
 class asynced(futured):

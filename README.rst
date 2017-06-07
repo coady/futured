@@ -42,6 +42,13 @@ but arguments can also be partially bound.
    fetch = threaded(Session().get, url)
    fetch(params=...)
 
+Thread and process pool executors can also be customized and reused.
+
+.. code-block:: python
+
+   threaded(max_workers=...)(func, ...)
+   processed(max_workers=...)(func, ...)
+
 The same interface works for ``aynscio``.
 
 .. code-block:: python
