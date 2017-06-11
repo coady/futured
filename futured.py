@@ -6,7 +6,7 @@ import types
 from concurrent import futures
 from functools import partial
 
-__version__ = '0.0'
+__version__ = '0.1'
 
 
 class futured(partial):

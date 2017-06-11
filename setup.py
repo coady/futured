@@ -14,7 +14,7 @@ setup(
     tests_require=['pytest-cov'],
     keywords='concurrent futures threads processes async asyncio',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
