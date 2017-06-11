@@ -96,3 +96,9 @@ def forked(values):
         pid, status = os.waitpid(pid, 0)
         if status:
             raise OSError(status, value)
+
+
+def decorated(base, **decorators):
+    """Return subclass with decorated methods."""
+    namespace = {name: decorators[name](getattr(base, name)) for name in decorators}
+    return type(base.__name__, (base,), namespace)

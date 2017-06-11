@@ -30,7 +30,7 @@ Transform any callable into one which runs in a thread or process pool, and retu
    fetch.map(urls)  # generates results in order
    fetch.map(urls, timeout=None)  # generates results as completed
 
-Naturally futured wrappers can be used as decorators,
+Naturally ``futured`` wrappers can be used as decorators,
 but arguments can also be partially bound.
 
 .. code-block:: python
@@ -39,8 +39,23 @@ but arguments can also be partially bound.
    def slow():
       ...
 
-   fetch = threaded(Session().get, url)
+   fetch = threaded(requests.Session().get, url)
    fetch(params=...)
+
+Methods are supported.
+
+.. code-block:: python
+
+   class FutureSession(requests.Session):
+      request = threaded(requests.Session.request)
+
+As well as a ``decorated`` utility for automatically subclassing.
+
+.. code-block:: python
+
+   from futured import decorated
+
+   FutureSession = decorated(requests.Session, request=threaded)
 
 Thread and process pool executors can also be customized and reused.
 

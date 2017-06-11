@@ -4,7 +4,7 @@ import subprocess
 import time
 from concurrent import futures
 import pytest
-from futured import futured, threaded, processed, asynced, command, forked
+from futured import futured, threaded, processed, asynced, command, forked, decorated
 
 delays = [0.2, 0.1, 0.0]
 
@@ -27,14 +27,11 @@ def asleep(delay):
     return asyncio.sleep(delay, result=delay)
 
 
-class wrapper:
-    @threaded
-    def method(self):
-        pass
-
-
 def test_class():
-    assert wrapper().method().result() is None
+    fstr = decorated(str, lower=threaded)
+    assert fstr('Test').lower().result() == 'test'
+    st, = fstr.lower.map(['Test'])
+    assert st == 'test'
 
 
 def test_executors():
