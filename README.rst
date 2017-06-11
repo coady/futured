@@ -65,6 +65,7 @@ Thread and process pool executors can also be customized and reused.
    processed(max_workers=...)(func, ...)
 
 The same interface works for ``aynscio``.
+For convenience, there's also a synchronous ``run`` method.
 
 .. code-block:: python
 
@@ -72,6 +73,8 @@ The same interface works for ``aynscio``.
    import aiohttp
 
    fetch = asynced(aiohttp.ClientSession().get)
+   fetch.map(urls, timeout=...)  # generates results as described above
+   fetch.run(url)  # single synchronous call
 
 ``command`` wraps ``subprocess.Popen`` to provide a ``Future`` compatible interface.
 

@@ -44,6 +44,8 @@ def test_executors():
 def test_results():
     assert next(futured.results([threaded(sleep)(0)])) == 0
     assert next(asynced.results([asleep(0)])) == 0
+    assert asleep.run(0) == 0
+    assert asynced.run(asyncio.sleep, 0) is None
 
 
 def test_map():

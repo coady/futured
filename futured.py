@@ -61,6 +61,10 @@ class asynced(futured):
             fs = asyncio.as_completed(fs, loop=loop, **kwargs)
         return map(loop.run_until_complete, fs)
 
+    def run(self, *args, **kwargs):
+        """Synchronously call and run coroutine."""
+        return asyncio.get_event_loop().run_until_complete(self(*args, **kwargs))
+
 
 class command(subprocess.Popen):
     """Asynchronous subprocess with a future compatible interface."""
