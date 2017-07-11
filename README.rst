@@ -29,6 +29,7 @@ Transform any callable into one which runs in a thread or process pool, and retu
 
    fetch.map(urls)  # generates results in order
    fetch.map(urls, timeout=...)  # generates results as completed
+   fetch.mapzip(urls)  # generates (url, result) pairs as completed
 
 Naturally ``futured`` wrappers can be used as decorators,
 but arguments can also be partially bound.
@@ -71,8 +72,12 @@ For convenience, there's also a synchronous ``run`` method.
 
    fetch = asynced(aiohttp.ClientSession().get)
    fetch(url)  # returns coroutine
-   fetch.map(urls, timeout=...)  # generates results as described above
    fetch.run(url)  # single synchronous call
+
+   # generate results as described above
+   fetch.results(fs)
+   fetch.map(urls)
+   fetch.mapzip(urls)
 
 ``command`` wraps ``subprocess.Popen`` to provide a ``Future`` compatible interface.
 

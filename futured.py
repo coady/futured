@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 import operator
 import os
 import subprocess
@@ -26,12 +27,32 @@ class futured(partial):
             fs = futures.as_completed(fs, **kwargs)
         return map(operator.methodcaller('result'), fs)
 
+    @staticmethod
+    def items(iterable, **kwargs):
+        """Generate key, result pairs as completed from futures.
+
+        :param iterable: key, future pairs
+        :param timeout: optional timeout
+        """
+        fs = []
+        for key, future in iterable:
+            future._key = key
+            fs.append(future)
+        return ((future._key, future.result()) for future in futures.as_completed(fs, **kwargs))
+
     def map(self, *iterables, **kwargs):
         """Asynchronously map function.
 
         :param kwargs: keyword options for `results`_
         """
         return self.results(map(self, *iterables), **kwargs)
+
+    def mapzip(self, iterable, **kwargs):
+        """Generate arg, result pairs as completed.
+
+        :param kwargs: keyword options for `items`_
+        """
+        return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
 
 
 class executed:
@@ -53,13 +74,20 @@ class processed(executed, futures.ProcessPoolExecutor):
 class asynced(futured):
     """A partial coroutine."""
     @staticmethod
-    def results(fs, loop=None, **kwargs):
+    def results(fs, *, loop=None, **kwargs):
         """Generate results concurrently from coroutines or futures."""
         loop = loop or asyncio.get_event_loop()
         fs = [asyncio.ensure_future(future, loop=loop) for future in fs]
         if kwargs:
             fs = asyncio.as_completed(fs, loop=loop, **kwargs)
         return map(loop.run_until_complete, fs)
+
+    @classmethod
+    def items(cls, iterable, *, timeout=None, **kwargs):
+        """Generate (key, result) pairs as completed from (key, future) pairs."""
+        async def coro(key, future):
+            return key, await future
+        return cls.results(itertools.starmap(coro, iterable), timeout=timeout, **kwargs)
 
     def run(self, *args, **kwargs):
         """Synchronously call and run coroutine."""
