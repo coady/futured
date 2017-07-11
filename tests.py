@@ -65,6 +65,9 @@ def test_subprocess():
         sleep('1').result(timeout=0)
     count = int(command('ls').pipe('wc', '-l').result().strip())
     assert count and count == len(list(command('ls')))
+    with pytest.raises(subprocess.CalledProcessError):
+        asynced.run(command.coroutine, 'sleep')
+    assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''
 
 
 def test_forked():

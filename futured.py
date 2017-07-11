@@ -71,12 +71,20 @@ class command(subprocess.Popen):
     def __init__(self, *args, **kwargs):
         super().__init__(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
 
+    def check(self, args, stdout, stderr):
+        if self.returncode:
+            raise subprocess.CalledProcessError(self.returncode, args, stdout, stderr)
+        return stdout
+
+    @classmethod
+    async def coroutine(cls, *args, **kwargs):
+        """Create a subprocess coroutine, suitable for timeouts."""
+        self = await asyncio.create_subprocess_exec(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+        return cls.check(self, args, *(await self.communicate()))
+
     def result(self, **kwargs):
         """Return stdout or raise stderr."""
-        stdout, stderr = self.communicate(**kwargs)
-        if self.returncode:
-            raise subprocess.CalledProcessError(self.returncode, self.args, stdout, stderr)
-        return stdout
+        return self.check(self.args, *self.communicate(**kwargs))
 
     def pipe(self, *args, **kwargs):
         """Pipe stdout to the next command's stdin."""

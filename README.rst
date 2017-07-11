@@ -25,10 +25,10 @@ Transform any callable into one which runs in a thread or process pool, and retu
 
    fs = (fetch(url + path) for path in paths)
    fetch.results(fs)  # generates results in order
-   fetch.results(fs, timeout=None)  # generates results as completed
+   fetch.results(fs, timeout=...)  # generates results as completed
 
    fetch.map(urls)  # generates results in order
-   fetch.map(urls, timeout=None)  # generates results as completed
+   fetch.map(urls, timeout=...)  # generates results as completed
 
 Naturally ``futured`` wrappers can be used as decorators,
 but arguments can also be partially bound.
@@ -42,14 +42,7 @@ but arguments can also be partially bound.
    fetch = threaded(requests.Session().get, url)
    fetch(params=...)
 
-Methods are supported.
-
-.. code-block:: python
-
-   class FutureSession(requests.Session):
-      request = threaded(requests.Session.request)
-
-As well as a ``decorated`` utility for automatically subclassing.
+Methods are supported, as well as a ``decorated`` utility for automatically subclassing.
 
 .. code-block:: python
 
@@ -57,7 +50,11 @@ As well as a ``decorated`` utility for automatically subclassing.
 
    FutureSession = decorated(requests.Session, request=threaded)
 
-Thread and process pool executors can also be customized and reused.
+   # equivalent to
+   class FutureSession(requests.Session):
+      request = threaded(requests.Session.request)
+
+Thread and process pool executors may be customized and reused.
 
 .. code-block:: python
 
@@ -73,6 +70,7 @@ For convenience, there's also a synchronous ``run`` method.
    import aiohttp
 
    fetch = asynced(aiohttp.ClientSession().get)
+   fetch(url)  # returns coroutine
    fetch.map(urls, timeout=...)  # generates results as described above
    fetch.run(url)  # single synchronous call
 
@@ -85,8 +83,10 @@ For convenience, there's also a synchronous ``run`` method.
    command('ls').result()  # returns stdout or raises stderr
    command('ls').pipe('wc')  # pipes into next command
    for line in command('ls'):  # iterable lines
+   command.coroutine('ls')  # returns coroutine
 
-   futured(command, 'ls')
+   futured(command, 'ls')  # supports `map` interface
+   asynced(command.coroutine, 'ls')  # supports `map` interface with timeout
 
 ``forked`` allows iteration in separate child processes.
 
