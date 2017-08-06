@@ -70,6 +70,7 @@ def test_subprocess():
     with pytest.raises(subprocess.CalledProcessError):
         asynced.run(command.coroutine, 'sleep')
     assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''
+    assert asynced.run(command.coroutine, 'sleep 0', shell=True) == b''
 
 
 def test_forked():
