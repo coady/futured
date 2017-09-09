@@ -27,9 +27,18 @@ def asleep(delay):
     return asyncio.sleep(delay, result=delay)
 
 
-async def sleeps():
-    for delay in delays:
-        yield await asleep(delay / 2)
+class sleeps:
+    def __init__(self):
+        self.delays = iter(delays)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        try:
+            return await asleep(next(self.delays) / 2)
+        except StopIteration:
+            raise StopAsyncIteration
 
 
 def test_class():
