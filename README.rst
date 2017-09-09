@@ -118,3 +118,11 @@ Tests
 100% branch coverage. ::
 
    $ pytest [--cov]
+
+Changes
+=========================
+dev
+
+* ``command.coroutine`` creates asyncio subprocesses
+* ``futured.mapzip`` generates results zipped with arguments
+* ``asynced.run`` supports asynchronous iterators

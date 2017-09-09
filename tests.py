@@ -27,6 +27,11 @@ def asleep(delay):
     return asyncio.sleep(delay, result=delay)
 
 
+async def sleeps():
+    for delay in delays:
+        yield await asleep(delay / 2)
+
+
 def test_class():
     fstr = decorated(str, lower=threaded)
     assert fstr('Test').lower().result() == 'test'
@@ -82,3 +87,8 @@ def test_forked():
     with pytest.raises(OSError):
         for delay in forked(delays):
             os._exit(bool(delay))
+
+
+def test_iteration():
+    for x, y in timer(zip(asynced.run(sleeps), asynced.run(sleeps))):
+        assert x == y

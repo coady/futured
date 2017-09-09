@@ -1,4 +1,5 @@
 import asyncio
+import collections
 import itertools
 import operator
 import os
@@ -90,8 +91,36 @@ class asynced(futured):
         return cls.results(itertools.starmap(coro, iterable), timeout=timeout, **kwargs)
 
     def run(self, *args, **kwargs):
-        """Synchronously call and run coroutine."""
-        return asyncio.get_event_loop().run_until_complete(self(*args, **kwargs))
+        """Synchronously call and run coroutine or asynchronous iterator."""
+        coro = self(*args, **kwargs)
+        if isinstance(coro, collections.AsyncIterable):
+            return looped(coro)
+        return asyncio.get_event_loop().run_until_complete(coro)
+
+
+class looped:
+    """Wrap an asynchronous iterable into an iterator.
+
+    Analogous to loop.run_until_complete for coroutines.
+    """
+    def __init__(self, aiterable, *, loop=None):
+        self.anext = aiterable.__aiter__().__anext__
+        self.loop = loop or asyncio.get_event_loop()
+        self.future = asyncio.ensure_future(self.anext(), loop=self.loop)
+
+    def __del__(self):  # suppress warning
+        self.future.cancel()  # pragma: no cover
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            result = self.loop.run_until_complete(self.future)
+        except StopAsyncIteration:
+            raise StopIteration
+        self.future = asyncio.ensure_future(self.anext(), loop=self.loop)
+        return result
 
 
 class command(subprocess.Popen):
