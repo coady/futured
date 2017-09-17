@@ -121,7 +121,7 @@ Tests
 
 Changes
 =========================
-dev
+0.2
 
 * ``command.coroutine`` creates asyncio subprocesses
 * ``futured.mapzip`` generates results zipped with arguments
