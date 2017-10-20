@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import os
 import subprocess
 import time
@@ -9,10 +10,11 @@ from futured import futured, threaded, processed, asynced, command, forked, deco
 delays = [0.2, 0.1, 0.0]
 
 
-def timer(results):
+@contextlib.contextmanager
+def timed():
     start = time.time()
     try:
-        return list(results)
+        yield
     finally:
         assert (time.time() - start) < sum(delays)
 
@@ -64,8 +66,10 @@ def test_results():
 
 @pytest.parametrized
 def test_map(coro=[threaded(sleep), processed(max_workers=len(delays))(sleep), asleep]):
-    assert timer(coro.map(delays)) == delays
-    assert timer(coro.map(delays, timeout=None)) == sorted(delays)
+    with timed():
+        assert list(coro.map(delays)) == delays
+    with timed():
+        assert list(coro.map(delays, timeout=None)) == sorted(delays)
     for (key, value), delay in zip(coro.mapzip(delays), sorted(delays)):
         assert key == value == delay
     with pytest.raises(futures.TimeoutError):
@@ -74,7 +78,8 @@ def test_map(coro=[threaded(sleep), processed(max_workers=len(delays))(sleep), a
 
 def test_subprocess():
     sleep = futured(command, 'sleep')
-    assert timer(sleep.map(map(str, delays))) == [b''] * len(delays)
+    with timed():
+        assert list(sleep.map(map(str, delays))) == [b''] * len(delays)
     with pytest.raises(subprocess.CalledProcessError):
         sleep().result()
     with pytest.raises(subprocess.TimeoutExpired):
@@ -96,8 +101,15 @@ def test_forked():
     with pytest.raises(OSError):
         for delay in forked(delays):
             os._exit(bool(delay))
+    with timed():
+        for delay in forked(delays, max_workers=2):
+            time.sleep(delay)
+    with pytest.raises(AssertionError), timed():
+        for delay in forked(delays, max_workers=1):
+            time.sleep(delay)
 
 
 def test_iteration():
-    for x, y in timer(zip(asynced.run(sleeps), asynced.run(sleeps))):
-        assert x == y
+    with timed():
+        for x, y in zip(asynced.run(sleeps), asynced.run(sleeps)):
+            assert x == y

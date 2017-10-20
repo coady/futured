@@ -3,6 +3,7 @@ import collections
 import itertools
 import operator
 import os
+import queue
 import subprocess
 import types
 from concurrent import futures
@@ -152,20 +153,34 @@ class command(subprocess.Popen):
         return iter(self.result().splitlines())
 
 
-def forked(values):
+class Results(queue.Queue):
+    def put(self, pid, value):
+        pid, status = os.waitpid(pid, 0)
+        super().put((status, value))
+
+    def get(self):
+        status, value = super().get()
+        if status:
+            raise OSError(status, value)
+        return not status
+
+
+def forked(values, max_workers=None):
     """Generate each value in its own child process and wait in the parent."""
-    procs = []
+    max_workers = max_workers or os.cpu_count() or 1  # same default as ProcessPoolExecutor
+    workers, results = 0, Results()
+    task = threaded(max_workers=max_workers)(results.put)
     for value in values:
+        while workers >= max_workers:
+            workers -= results.get()
         pid = os.fork()
         if pid:
-            procs.append((pid, value))
+            workers += bool(task(pid, value))
         else:  # pragma: no cover
             yield value
             os._exit(0)
-    for pid, value in procs:
-        pid, status = os.waitpid(pid, 0)
-        if status:
-            raise OSError(status, value)
+    while workers:
+        workers -= results.get()
 
 
 def decorated(base, **decorators):
