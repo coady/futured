@@ -41,14 +41,6 @@ class sleeps:
             raise StopAsyncIteration
 
 
-def fixture(*params):
-    return pytest.fixture(params=params)(lambda request: request.param)
-
-
-executed = fixture(threaded, processed)
-coro = fixture(threaded(sleep), processed(max_workers=len(delays))(sleep), asleep)
-
-
 def test_class():
     fstr = decorated(str, lower=threaded)
     assert fstr('Test').lower().result() == 'test'
@@ -56,7 +48,8 @@ def test_class():
     assert st == 'test'
 
 
-def test_executors(executed):
+@pytest.parametrized
+def test_executors(executed=[threaded, processed]):
     executor = executed(max_workers=1)
     assert executor._max_workers == 1
     assert executor(sleep).func.__self__ is executor
@@ -69,7 +62,8 @@ def test_results():
     assert asynced.run(asyncio.sleep, 0) is None
 
 
-def test_map(coro):
+@pytest.parametrized
+def test_map(coro=[threaded(sleep), processed(max_workers=len(delays))(sleep), asleep]):
     assert timer(coro.map(delays)) == delays
     assert timer(coro.map(delays, timeout=None)) == sorted(delays)
     for (key, value), delay in zip(coro.mapzip(delays), sorted(delays)):

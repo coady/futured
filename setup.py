@@ -11,7 +11,7 @@ setup(
     url='https://bitbucket.org/coady/futured',
     license='Apache Software License',
     py_modules=['futured'],
-    tests_require=['pytest-cov'],
+    tests_require=['pytest-cov', 'pytest-parametrized'],
     keywords='concurrent futures threads processes async asyncio',
     classifiers=[
         'Development Status :: 4 - Beta',
