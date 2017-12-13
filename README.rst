@@ -1,5 +1,5 @@
 .. image:: https://img.shields.io/pypi/v/futured.svg
-   :target: https://pypi.python.org/pypi/futured/
+   :target: https://pypi.org/project/futured/
 .. image:: https://img.shields.io/pypi/pyversions/futured.svg
 .. image:: https://img.shields.io/pypi/status/futured.svg
 .. image:: https://img.shields.io/travis/coady/futured.svg
@@ -99,7 +99,7 @@ For convenience, there's also a synchronous ``run`` method.
 
    from futured import forked
 
-   for value in forked(values):
+   for value in forked(values, max_workers=...):
       # in a child process
    # in parent after children have exited
 
@@ -109,10 +109,6 @@ Installation
 
    $ pip install futured
 
-Dependencies
-=========================
-* Python 3.5+
-
 Tests
 =========================
 100% branch coverage. ::
@@ -121,6 +117,10 @@ Tests
 
 Changes
 =========================
+dev
+
+* ``forked`` has optional maximum number of workers
+
 0.2
 
 * ``command.coroutine`` creates asyncio subprocesses
