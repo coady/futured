@@ -1,4 +1,4 @@
 syntax: glob
 *.pyc
 .coverage*
-.cache
+.*cache

@@ -8,6 +8,7 @@ import subprocess
 import types
 from concurrent import futures
 from functools import partial
+from typing import AsyncIterable, Callable, Generator, Iterable, Iterator
 
 __version__ = '0.2'
 
@@ -18,7 +19,7 @@ class futured(partial):
         return self if instance is None else types.MethodType(self, instance)
 
     @staticmethod
-    def results(fs, **kwargs):
+    def results(fs: Iterable, **kwargs) -> Iterator:
         """Generate results concurrently from futures, by default in order.
 
         :param fs: iterable of futures
@@ -49,7 +50,7 @@ class futured(partial):
         """
         return self.results(map(self, *iterables), **kwargs)
 
-    def mapzip(self, iterable, **kwargs):
+    def mapzip(self, iterable: Iterable, **kwargs) -> Iterator:
         """Generate arg, result pairs as completed.
 
         :param kwargs: keyword options for `items`_
@@ -57,26 +58,25 @@ class futured(partial):
         return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
 
 
-class executed:
+class threaded(futures.ThreadPoolExecutor):
+    """A partial function executed in its own thread pool."""
     def __new__(cls, *args, **kwargs):
         return cls()(*args, **kwargs) if args else object.__new__(cls)
 
-    def __call__(self, func, *args, **kwargs):
+    def __call__(self, func: Callable, *args, **kwargs):
         return futured(self.submit, func, *args, **kwargs)
 
 
-class threaded(executed, futures.ThreadPoolExecutor):
-    """A partial function executed in its own thread pool."""
-
-
-class processed(executed, futures.ProcessPoolExecutor):
+class processed(futures.ProcessPoolExecutor):
     """A partial function executed in its own process pool."""
+    __new__ = threaded.__new__
+    __call__ = threaded.__call__
 
 
 class asynced(futured):
     """A partial coroutine."""
     @staticmethod
-    def results(fs, *, loop=None, **kwargs):
+    def results(fs: Iterable, *, loop=None, **kwargs) -> Iterator:
         """Generate results concurrently from coroutines or futures."""
         loop = loop or asyncio.get_event_loop()
         fs = [asyncio.ensure_future(future, loop=loop) for future in fs]
@@ -85,7 +85,7 @@ class asynced(futured):
         return map(loop.run_until_complete, fs)
 
     @classmethod
-    def items(cls, iterable, *, timeout=None, **kwargs):
+    def items(cls, iterable: Iterable, *, timeout=None, **kwargs) -> Iterator:
         """Generate (key, result) pairs as completed from (key, future) pairs."""
         async def coro(key, future):
             return key, await future
@@ -104,7 +104,7 @@ class looped:
 
     Analogous to loop.run_until_complete for coroutines.
     """
-    def __init__(self, aiterable, *, loop=None):
+    def __init__(self, aiterable: AsyncIterable, *, loop=None) -> None:
         self.anext = aiterable.__aiter__().__anext__
         self.loop = loop or asyncio.get_event_loop()
         self.future = asyncio.ensure_future(self.anext(), loop=self.loop)
@@ -165,7 +165,7 @@ class Results(queue.Queue):
         return not status
 
 
-def forked(values, max_workers=None):
+def forked(values: Iterable, max_workers: int = None) -> Generator:
     """Generate each value in its own child process and wait in the parent."""
     max_workers = max_workers or os.cpu_count() or 1  # same default as ProcessPoolExecutor
     workers, results = 0, Results()
@@ -183,7 +183,7 @@ def forked(values, max_workers=None):
         workers -= results.get()
 
 
-def decorated(base, **decorators):
+def decorated(base: type, **decorators) -> type:
     """Return subclass with decorated methods."""
     namespace = {name: decorators[name](getattr(base, name)) for name in decorators}
     return type(base.__name__, (base,), namespace)

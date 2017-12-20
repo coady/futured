@@ -1,6 +1,7 @@
 check:
 	python3 setup.py $@ -mrs
 	flake8
+	mypy futured.py
 	pytest --cov --cov-fail-under=100
 
 clean:
