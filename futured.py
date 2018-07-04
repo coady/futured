@@ -31,7 +31,8 @@ class tasks(collections.OrderedDict):
         return self
 
     async def __aexit__(self, *args):
-        self.update({key: await self[key] for key in self})
+        for key in self:
+            self[key] = await self[key]
 
 
 class futured(partial):

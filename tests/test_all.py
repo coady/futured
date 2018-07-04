@@ -7,7 +7,7 @@ from concurrent import futures
 import pytest
 from futured import futured, threaded, processed, asynced, command, forked, decorated
 
-delays = [0.2, 0.1, 0.0]
+delays = [0.2, 0.1, 0.05]
 
 
 @contextlib.contextmanager
