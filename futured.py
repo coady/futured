@@ -13,6 +13,21 @@ from typing import AsyncIterable, Callable, Generator, Iterable, Iterator
 __version__ = '0.2'
 
 
+class tasks(collections.OrderedDict):
+    """A context manager which processes registered futures on exit."""
+    def __init__(self, callback):
+        self.callback = callback
+
+    def add(self, func, *args, **kwargs):
+        self[len(self)] = func(*args, **kwargs)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.update(zip(self, self.callback(self.values())))
+
+
 class futured(partial):
     """A partial function which returns futures."""
     def __get__(self, instance, owner):
@@ -56,6 +71,11 @@ class futured(partial):
         :param kwargs: keyword options for `items`_
         """
         return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
+
+    @classmethod
+    def wait(cls, **kwargs):
+        """Return context manager which waits on `results`._"""
+        return tasks(partial(cls.results, **kwargs))
 
 
 class threaded(futures.ThreadPoolExecutor):

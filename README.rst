@@ -93,6 +93,21 @@ For convenience, there's also a synchronous ``run`` method.
    futured(command, 'ls')  # supports `map` interface
    asynced(command.coroutine, 'ls')  # supports `map` interface with timeout
 
+``futured`` classes have a ``wait`` context manager which collects results from tasks.
+Tasks can be registered in a dict, or called and added in order.
+
+.. code-block:: python
+
+   with asynced.wait(loop=...) as tasks:
+      tasks['first'] = future
+      tasks['second'] = future
+   tasks  # mapping of results
+
+   with futured.wait() as tasks:
+      tasks.add(func, ...)
+      tasks.add(func, ...)
+   tasks.values()  # results in order
+
 ``forked`` allows iteration in separate child processes.
 
 .. code-block:: python
@@ -120,6 +135,7 @@ Changes
 dev
 
 * ``forked`` has optional maximum number of workers
+* ``wait`` context manager
 
 0.2
 

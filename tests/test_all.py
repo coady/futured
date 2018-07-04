@@ -113,3 +113,17 @@ def test_iteration():
     with timed():
         for x, y in zip(asynced.run(sleeps), asynced.run(sleeps)):
             assert x == y
+
+
+def test_context():
+    sleep = threaded(time.sleep)
+    with sleep.wait() as tasks:
+        tasks['first'] = sleep(0.1)
+        tasks.add(sleep, 0)
+        assert list(tasks) == ['first', 1]
+    assert tasks == {'first': None, 1: None}
+    with asynced.wait(loop=None) as tasks:
+        tasks.add(asyncio.sleep, 0.1)
+        tasks['second'] = asyncio.sleep(0)
+        assert list(tasks) == [0, 'second']
+    assert tasks == {0: None, 'second': None}
