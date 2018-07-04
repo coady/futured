@@ -108,6 +108,10 @@ Tasks can be registered in a dict, or called and added in order.
       tasks.add(func, ...)
    tasks.values()  # results in order
 
+   async with asynced.wait() as tasks:
+      ...
+   tasks  # awaited results
+
 ``forked`` allows iteration in separate child processes.
 
 .. code-block:: python

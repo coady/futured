@@ -15,7 +15,7 @@ __version__ = '0.2'
 
 class tasks(collections.OrderedDict):
     """A context manager which processes registered futures on exit."""
-    def __init__(self, callback):
+    def __init__(self, callback=None):
         self.callback = callback
 
     def add(self, func, *args, **kwargs):
@@ -26,6 +26,12 @@ class tasks(collections.OrderedDict):
 
     def __exit__(self, *args):
         self.update(zip(self, self.callback(self.values())))
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        self.update({key: await self[key] for key in self})
 
 
 class futured(partial):
