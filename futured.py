@@ -41,14 +41,14 @@ class futured(partial):
         return self if instance is None else types.MethodType(self, instance)
 
     @staticmethod
-    def results(fs: Iterable, **kwargs) -> Iterator:
+    def results(fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
         """Generate results concurrently from futures, by default in order.
 
         :param fs: iterable of futures
-        :param timeout: optional timeout generates results as completed
+        :param as_completed, kwargs: generate results as completed with options, e.g., timeout
         """
         fs = list(fs)  # ensure futures are executing
-        if kwargs:
+        if as_completed or kwargs:
             fs = futures.as_completed(fs, **kwargs)
         return map(operator.methodcaller('result'), fs)
 
@@ -57,7 +57,7 @@ class futured(partial):
         """Generate key, result pairs as completed from futures.
 
         :param iterable: key, future pairs
-        :param timeout: optional timeout
+        :param kwargs: as completed options, e.g., timeout
         """
         fs = []
         for key, future in iterable:
@@ -103,20 +103,22 @@ class processed(futures.ProcessPoolExecutor):
 class asynced(futured):
     """A partial coroutine."""
     @staticmethod
-    def results(fs: Iterable, *, loop=None, **kwargs) -> Iterator:
+    def results(fs: Iterable, *, loop=None, as_completed=False, **kwargs) -> Iterator:
         """Generate results concurrently from coroutines or futures."""
         loop = loop or asyncio.get_event_loop()
         fs = [asyncio.ensure_future(future, loop=loop) for future in fs]
-        if kwargs:
+        if as_completed or kwargs:
             fs = asyncio.as_completed(fs, loop=loop, **kwargs)
         return map(loop.run_until_complete, fs)
 
+    @staticmethod
+    async def pair(key, future):
+        return key, await future
+
     @classmethod
-    def items(cls, iterable: Iterable, *, timeout=None, **kwargs) -> Iterator:
+    def items(cls, iterable: Iterable, **kwargs) -> Iterator:
         """Generate (key, result) pairs as completed from (key, future) pairs."""
-        async def coro(key, future):
-            return key, await future
-        return cls.results(itertools.starmap(coro, iterable), timeout=timeout, **kwargs)
+        return cls.results(itertools.starmap(cls.pair, iterable), as_completed=True, **kwargs)
 
     def run(self, *args, **kwargs):
         """Synchronously call and run coroutine or asynchronous iterator."""

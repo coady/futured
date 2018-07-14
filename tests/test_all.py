@@ -70,6 +70,8 @@ def test_map(coro=[threaded(sleep), processed(max_workers=len(delays))(sleep), a
         assert list(coro.map(delays)) == delays
     with timed():
         assert list(coro.map(delays, timeout=None)) == sorted(delays)
+    with timed():
+        assert list(coro.map(delays, as_completed=True)) == sorted(delays)
     for (key, value), delay in zip(coro.mapzip(delays), sorted(delays)):
         assert key == value == delay
     with pytest.raises(futures.TimeoutError):
