@@ -1,7 +1,7 @@
 check:
 	python3 setup.py $@ -mrs
 	flake8
-	mypy futured.py
+	mypy futured.py --ignore-missing-imports
 	pytest --cov --cov-fail-under=100
 
 clean:

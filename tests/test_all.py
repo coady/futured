@@ -50,13 +50,6 @@ def test_class():
     assert st == 'test'
 
 
-@pytest.parametrized
-def test_executors(executed=[threaded, processed]):
-    executor = executed(max_workers=1)
-    assert executor._max_workers == 1
-    assert executor(sleep).func.__self__ is executor
-
-
 def test_results():
     assert next(futured.results([threaded(sleep)(0)])) == 0
     assert next(asynced.results([asleep(0)])) == 0
@@ -65,7 +58,7 @@ def test_results():
 
 
 @pytest.parametrized
-def test_map(coro=[threaded(sleep), processed(max_workers=len(delays))(sleep), asleep]):
+def test_map(coro=[threaded(max_workers=len(delays))(sleep), processed(max_workers=len(delays))(sleep), asleep]):
     with timed():
         assert list(coro.map(delays)) == delays
     with timed():
@@ -94,6 +87,8 @@ def test_command():
         asynced.run(command.coroutine, 'sleep')
     assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''
     assert asynced.run(command.coroutine, 'sleep 0', shell=True) == b''
+    with pytest.raises(TypeError):
+        list(sleep.mapzip('0'))
 
 
 def test_forked():
@@ -128,3 +123,10 @@ def test_context():
     with asynced.waiting(asyncio.sleep(0, result='first'), loop=None) as tasks:
         tasks.append(asyncio.sleep(0, result='second'))
     assert tasks == ['first', 'second']
+
+
+def test_distributed():
+    pytest.importorskip('distributed')
+    from futured import distributed
+    dsleep = distributed(time.sleep)
+    assert list(dsleep.map(delays)) == list(dsleep.map(delays, as_completed=True)) == [None] * len(delays)

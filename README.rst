@@ -141,6 +141,7 @@ dev
 * ``forked`` has optional maximum number of workers
 * ``waiting`` context manager
 * ``command`` pipes (|)
+* ``distributed.Client`` support
 
 0.2
 

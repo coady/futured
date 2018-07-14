@@ -9,18 +9,20 @@ import subprocess
 import types
 from concurrent import futures
 from functools import partial
-from typing import AsyncIterable, Callable, Generator, Iterable, Iterator
+from typing import AsyncIterable, Iterable, Iterator
 
 __version__ = '0.2'
 
 
 class futured(partial):
     """A partial function which returns futures."""
+    as_completed = NotImplemented
+
     def __get__(self, instance, owner):
         return self if instance is None else types.MethodType(self, instance)
 
-    @staticmethod
-    def results(fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
+    @classmethod
+    def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
         """Generate results concurrently from futures, by default in order.
 
         :param fs: iterable of futures
@@ -28,11 +30,11 @@ class futured(partial):
         """
         fs = list(fs)  # ensure futures are executing
         if as_completed or kwargs:
-            fs = futures.as_completed(fs, **kwargs)
+            fs = cls.as_completed(fs, **kwargs)
         return map(operator.methodcaller('result'), fs)
 
-    @staticmethod
-    def items(iterable, **kwargs):
+    @classmethod
+    def items(cls, iterable, **kwargs):
         """Generate key, result pairs as completed from futures.
 
         :param iterable: key, future pairs
@@ -42,7 +44,7 @@ class futured(partial):
         for key, future in iterable:
             future._key = key
             fs.append(future)
-        return ((future._key, future.result()) for future in futures.as_completed(fs, **kwargs))
+        return ((future._key, future.result()) for future in cls.as_completed(fs, **kwargs))
 
     def map(self, *iterables, **kwargs):
         """Asynchronously map function.
@@ -69,25 +71,37 @@ class futured(partial):
             fs[:] = cls.results(fs, **kwargs)
 
 
-class threaded(futures.ThreadPoolExecutor):
-    """A partial function executed in its own thread pool."""
+class executed(futured):
+    """Extensible base class for callables which require a ``submit`` method."""
+    as_completed = futures.as_completed
+    Executor = NotImplemented
+
     def __new__(cls, *args, **kwargs):
-        return cls()(*args, **kwargs) if args else object.__new__(cls)
+        if args:
+            return futured.__new__(cls, cls.Executor().submit, *args,  **kwargs)
+        return partial(futured.__new__, cls, cls.Executor(**kwargs).submit)
 
-    def __call__(self, func: Callable, *args, **kwargs):
-        return futured(self.submit, func, *args, **kwargs)
+
+class threaded(executed):
+    """A partial function executed in its own thread pool."""
+    Executor = futures.ThreadPoolExecutor
 
 
-class processed(futures.ProcessPoolExecutor):
+class processed(executed):
     """A partial function executed in its own process pool."""
-    __new__ = threaded.__new__
-    __call__ = threaded.__call__
+    Executor = futures.ProcessPoolExecutor
+
+
+with contextlib.suppress(ImportError):
+    class distributed(executed):
+        """A partial function executed by a dask distributed client."""
+        from distributed import as_completed, Client as Executor
 
 
 class asynced(futured):
     """A partial coroutine."""
-    @staticmethod
-    def results(fs: Iterable, *, loop=None, as_completed=False, **kwargs) -> Iterator:
+    @classmethod
+    def results(cls, fs: Iterable, *, loop=None, as_completed=False, **kwargs) -> Iterator:
         """Generate results concurrently from coroutines or futures."""
         loop = loop or asyncio.get_event_loop()
         fs = [asyncio.ensure_future(future, loop=loop) for future in fs]
@@ -181,7 +195,7 @@ class Results(queue.Queue):
         return not status
 
 
-def forked(values: Iterable, max_workers: int = None) -> Generator:
+def forked(values, max_workers=None):
     """Generate each value in its own child process and wait in the parent."""
     max_workers = max_workers or os.cpu_count() or 1  # same default as ProcessPoolExecutor
     workers, results = 0, Results()
