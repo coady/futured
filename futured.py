@@ -1,5 +1,6 @@
 import asyncio
 import collections
+import contextlib
 import itertools
 import operator
 import os
@@ -11,28 +12,6 @@ from functools import partial
 from typing import AsyncIterable, Callable, Generator, Iterable, Iterator
 
 __version__ = '0.2'
-
-
-class tasks(collections.OrderedDict):
-    """A context manager which processes registered futures on exit."""
-    def __init__(self, callback=None):
-        self.callback = callback
-
-    def add(self, func, *args, **kwargs):
-        self[len(self)] = func(*args, **kwargs)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.update(zip(self, self.callback(self.values())))
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *args):
-        for key in self:
-            self[key] = await self[key]
 
 
 class futured(partial):
@@ -80,9 +59,14 @@ class futured(partial):
         return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
 
     @classmethod
-    def wait(cls, **kwargs):
+    @contextlib.contextmanager
+    def waiting(cls, *fs, **kwargs):
         """Return context manager which waits on `results`._"""
-        return tasks(partial(cls.results, **kwargs))
+        fs = list(fs)
+        try:
+            yield fs
+        finally:
+            fs[:] = cls.results(fs, **kwargs)
 
 
 class threaded(futures.ThreadPoolExecutor):

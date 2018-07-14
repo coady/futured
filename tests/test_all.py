@@ -119,22 +119,12 @@ def test_iteration():
             assert x == y
 
 
-async def tasked():
-    async with asynced.wait() as tasks:
-        tasks.add(asyncio.sleep, 0)
-    return tasks
-
-
 def test_context():
     sleep = threaded(time.sleep)
-    with sleep.wait() as tasks:
-        tasks['first'] = sleep(0.1)
-        tasks.add(sleep, 0)
-        assert list(tasks) == ['first', 1]
-    assert tasks == {'first': None, 1: None}
-    with asynced.wait(loop=None) as tasks:
-        tasks.add(asyncio.sleep, 0.1)
-        tasks['second'] = asyncio.sleep(0)
-        assert list(tasks) == [0, 'second']
-    assert tasks == {0: None, 'second': None}
-    assert asynced.run(tasked) == {0: None}
+    with sleep.waiting(sleep(0)) as tasks:
+        tasks.append(sleep(0))
+        assert all(isinstance(task, futures.Future) for task in tasks)
+    assert tasks == [None, None]
+    with asynced.waiting(asyncio.sleep(0, result='first'), loop=None) as tasks:
+        tasks.append(asyncio.sleep(0, result='second'))
+    assert tasks == ['first', 'second']

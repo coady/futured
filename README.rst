@@ -139,7 +139,7 @@ Changes
 dev
 
 * ``forked`` has optional maximum number of workers
-* ``wait`` context manager
+* ``waiting`` context manager
 * ``command`` pipes (|)
 
 0.2
