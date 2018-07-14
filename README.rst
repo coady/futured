@@ -86,7 +86,7 @@ For convenience, there's also a synchronous ``run`` method.
    from futured import futured, command
 
    command('ls').result()  # returns stdout or raises stderr
-   command('ls').pipe('wc')  # pipes into next command
+   command('ls').pipe('wc')  # pipes into next command, or | ('wc',... )
    for line in command('ls'):  # iterable lines
    command.coroutine('ls')  # returns coroutine
 
@@ -140,6 +140,7 @@ dev
 
 * ``forked`` has optional maximum number of workers
 * ``wait`` context manager
+* ``command`` pipes (|)
 
 0.2
 

@@ -76,7 +76,7 @@ def test_map(coro=[threaded(sleep), processed(max_workers=len(delays))(sleep), a
         list(coro.map(delays, timeout=0))
 
 
-def test_subprocess():
+def test_command():
     sleep = futured(command, 'sleep')
     with timed():
         assert list(sleep.map(map(str, delays))) == [b''] * len(delays)
@@ -86,6 +86,8 @@ def test_subprocess():
         sleep('1').result(timeout=0)
     count = int(command('ls').pipe('wc', '-l').result().strip())
     assert count and count == len(list(command('ls')))
+    line, = command('ls') | ('wc',)
+    assert len(line.split()) == 3
     with pytest.raises(subprocess.CalledProcessError):
         asynced.run(command.coroutine, 'sleep')
     assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''

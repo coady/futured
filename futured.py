@@ -176,6 +176,9 @@ class command(subprocess.Popen):
         """Pipe stdout to the next command's stdin."""
         return type(self)(*args, stdin=self.stdout, **kwargs)
 
+    def __or__(self, other: Iterable):
+        return self.pipe(*other)
+
     def __iter__(self):
         return iter(self.result().splitlines())
 
