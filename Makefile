@@ -1,5 +1,5 @@
 check:
-	python3 setup.py $@ -mrs
+	python3 setup.py $@ -ms
 	flake8
 	mypy futured.py --ignore-missing-imports
 	pytest --cov --cov-fail-under=100
@@ -10,4 +10,3 @@ clean:
 
 dist:
 	python3 setup.py sdist bdist_wheel
-	rst2html.py README.rst $@/README.html
