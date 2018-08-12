@@ -112,30 +112,23 @@ for value in forked(values, max_workers=...):
  # in parent after children have exited
 ```
 
-Installation
-============
+# Installation
 
     $ pip install futured
 
-Tests
-=====
-
-100% branch coverage. :
+# Tests
+100% branch coverage.
 
     $ pytest [--cov]
 
-Changes
-=======
-
+# Changes
 dev
-
 * `forked` has optional maximum number of workers
 * `waiting` context manager
-* `command` pipes (\|)
+* `command` pipes (`|`)
 * `distributed.Client` support
 
 0.2
-
 * `command.coroutine` creates asyncio subprocesses
 * `futured.mapzip` generates results zipped with arguments
 * `asynced.run` supports asynchronous iterators
