@@ -122,7 +122,7 @@ for value in forked(values, max_workers=...):
     $ pytest [--cov]
 
 # Changes
-dev
+0.3
 * `forked` has optional maximum number of workers
 * `waiting` context manager
 * `command` pipes (`|`)
