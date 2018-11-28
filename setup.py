@@ -9,7 +9,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Aric Coady',
     author_email='aric.coady@gmail.com',
-    url='https://bitbucket.org/coady/futured',
+    url='https://github.com/coady/futured',
     license='Apache Software License',
     py_modules=['futured'],
     python_requires='>=3.5',
