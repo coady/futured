@@ -49,21 +49,21 @@ class futured(partial):
     def map(self, *iterables, **kwargs):
         """Asynchronously map function.
 
-        :param kwargs: keyword options for `results`_
+        :param kwargs: keyword options for :meth:`results`
         """
         return self.results(map(self, *iterables), **kwargs)
 
     def mapzip(self, iterable: Iterable, **kwargs) -> Iterator:
         """Generate arg, result pairs as completed.
 
-        :param kwargs: keyword options for `items`_
+        :param kwargs: keyword options for :meth:`items`
         """
         return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
 
     @classmethod
     @contextlib.contextmanager
     def waiting(cls, *fs, **kwargs):
-        """Return context manager which waits on `results`._"""
+        """Return context manager which waits on :meth:`results`."""
         fs = list(fs)
         try:
             yield fs
@@ -177,9 +177,11 @@ class command(subprocess.Popen):
         return type(self)(*args, stdin=self.stdout, **kwargs)
 
     def __or__(self, other: Iterable):
+        """Alias of :meth:`pipe`."""
         return self.pipe(*other)
 
     def __iter__(self):
+        """Return output lines."""
         return iter(self.result().splitlines())
 
 

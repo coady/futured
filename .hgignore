@@ -2,3 +2,4 @@ syntax: glob
 *.pyc
 .coverage*
 .*cache
+docs/_build

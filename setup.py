@@ -10,8 +10,14 @@ setup(
     author='Aric Coady',
     author_email='aric.coady@gmail.com',
     url='https://github.com/coady/futured',
+    project_urls={
+        'Documentation': 'https://futured.readthedocs.io',
+    },
     license='Apache Software License',
     py_modules=['futured'],
+    extras_require={
+        'docs': ['m2r'],
+    },
     python_requires='>=3.5',
     tests_require=['pytest-cov', 'pytest-parametrized'],
     keywords='concurrent futures threads processes async asyncio',

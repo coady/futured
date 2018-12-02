@@ -3,6 +3,7 @@
 ![image](https://img.shields.io/pypi/status/futured.svg)
 [![image](https://img.shields.io/travis/coady/futured.svg)](https://travis-ci.org/coady/futured)
 [![image](https://img.shields.io/codecov/c/github/coady/futured.svg)](https://codecov.io/github/coady/futured)
+[![image](https://readthedocs.org/projects/futured/badge)](https://futured.readthedocs.io)
 [![image](https://requires.io/github/coady/futured/requirements.svg)](https://requires.io/github/coady/futured/requirements/)
 [![image](https://api.codeclimate.com/v1/badges/bdc33b8af847fbbecfce/maintainability)](https://codeclimate.com/github/coady/futured/maintainability)
 
