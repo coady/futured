@@ -1,5 +1,4 @@
 import asyncio
-import collections
 import contextlib
 import itertools
 import operator
@@ -121,7 +120,7 @@ class asynced(futured):
     def run(self, *args, **kwargs):
         """Synchronously call and run coroutine or asynchronous iterator."""
         coro = self(*args, **kwargs)
-        if isinstance(coro, collections.AsyncIterable):
+        if isinstance(coro, AsyncIterable):
             return looped(coro)
         return asyncio.get_event_loop().run_until_complete(coro)
 

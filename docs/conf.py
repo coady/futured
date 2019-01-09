@@ -21,7 +21,7 @@ import futured
 # -- Project information -----------------------------------------------------
 
 project = 'futured'
-copyright = '2018, Aric Coady'
+copyright = '2019, Aric Coady'
 author = 'Aric Coady'
 
 # The short X.Y version

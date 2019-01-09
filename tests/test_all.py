@@ -5,6 +5,7 @@ import subprocess
 import time
 from concurrent import futures
 import pytest
+from parametrized import parametrized
 from futured import futured, threaded, processed, asynced, command, forked, decorated
 
 delays = [0.2, 0.1, 0.05]
@@ -57,7 +58,7 @@ def test_results():
     assert asynced.run(asyncio.sleep, 0) is None
 
 
-@pytest.parametrized
+@parametrized
 def test_map(coro=[threaded(max_workers=len(delays))(sleep), processed(max_workers=len(delays))(sleep), asleep]):
     with timed():
         assert list(coro.map(delays)) == delays
