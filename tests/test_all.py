@@ -52,7 +52,10 @@ def test_class():
 
 
 def test_results():
-    assert next(futured.results([threaded(sleep)(0)])) == 0
+    with threaded(sleep) as tsleep:
+        assert next(futured.results([tsleep(0)])) == 0
+    with pytest.raises(RuntimeError):
+        tsleep(0)
     assert next(asynced.results([asleep(0)])) == 0
     assert asleep.run(0) == 0
     assert asynced.run(asyncio.sleep, 0) is None
@@ -129,5 +132,7 @@ def test_context():
 def test_distributed():
     pytest.importorskip('distributed')
     from futured import distributed
-    dsleep = distributed(time.sleep)
-    assert list(dsleep.map(delays)) == list(dsleep.map(delays, as_completed=True)) == [None] * len(delays)
+    with distributed(time.sleep) as dsleep:
+        assert list(dsleep.map(delays)) == list(dsleep.map(delays, as_completed=True)) == [None] * len(delays)
+    with pytest.raises(Exception):
+        dsleep(0)

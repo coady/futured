@@ -1,5 +1,6 @@
 [![image](https://img.shields.io/pypi/v/futured.svg)](https://pypi.org/project/futured/)
 ![image](https://img.shields.io/pypi/pyversions/futured.svg)
+[![image](https://pepy.tech/badge/futured)](https://pepy.tech/project/futured)
 ![image](https://img.shields.io/pypi/status/futured.svg)
 [![image](https://img.shields.io/travis/coady/futured.svg)](https://travis-ci.org/coady/futured)
 [![image](https://img.shields.io/codecov/c/github/coady/futured.svg)](https://codecov.io/github/coady/futured)
@@ -73,7 +74,7 @@ tasks  # results in order
 ```
 
 ## asynced
-The same interface works for `aynscio`. For convenience, there's also a synchronous `run` method.
+The same interface works for `asyncio`. For convenience, there's also a synchronous `run` method.
 
 ```python
 from futured import asynced

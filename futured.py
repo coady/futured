@@ -80,6 +80,13 @@ class executed(futured):
             return futured.__new__(cls, cls.Executor().submit, *args,  **kwargs)
         return partial(futured.__new__, cls, cls.Executor(**kwargs).submit)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.func.__self__.shutdown()
+    __del__ = __exit__
+
 
 class threaded(executed):
     """A partial function executed in its own thread pool."""
@@ -95,6 +102,10 @@ with contextlib.suppress(ImportError):
     class distributed(executed):
         """A partial function executed by a dask distributed client."""
         from distributed import as_completed, Client as Executor
+
+        def __exit__(self, *args):
+            self.func.__self__.close()
+        __del__ = __exit__
 
 
 class asynced(futured):
