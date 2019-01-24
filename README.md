@@ -57,7 +57,8 @@ class FutureSession(requests.Session):
     request = threaded(requests.Session.request)
 ```
 
-Thread and process pool executors may be customized and reused.
+Thread and process pool executors may be used as context managers,
+customized with options, and reused with different callables.
 
 ```python
 threaded(max_workers=...)(func, ...)

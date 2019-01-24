@@ -84,8 +84,7 @@ class executed(futured):
         return self
 
     def __exit__(self, *args):
-        self.func.__self__.shutdown()
-    __del__ = __exit__
+        self.func.__self__.__exit__(*args)
 
 
 class threaded(executed):
@@ -102,10 +101,6 @@ with contextlib.suppress(ImportError):
     class distributed(executed):
         """A partial function executed by a dask distributed client."""
         from distributed import as_completed, Client as Executor
-
-        def __exit__(self, *args):
-            self.func.__self__.close()
-        __del__ = __exit__
 
 
 class asynced(futured):

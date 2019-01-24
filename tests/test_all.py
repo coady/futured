@@ -52,6 +52,8 @@ def test_class():
 
 
 def test_results():
+    with timed():
+        assert threaded(sleep)(sum(delays)).running
     with threaded(sleep) as tsleep:
         assert next(futured.results([tsleep(0)])) == 0
     with pytest.raises(RuntimeError):
