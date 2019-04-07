@@ -8,7 +8,7 @@ import subprocess
 import types
 from concurrent import futures
 from functools import partial
-from typing import AsyncIterable, Iterable, Iterator
+from typing import AsyncIterable, Callable, Iterable, Iterator
 
 __version__ = '0.3'
 
@@ -33,7 +33,7 @@ class futured(partial):
         return map(operator.methodcaller('result'), fs)
 
     @classmethod
-    def items(cls, iterable, **kwargs):
+    def items(cls, iterable: Iterable, **kwargs) -> Iterator:
         """Generate key, result pairs as completed from futures.
 
         :param iterable: key, future pairs
@@ -45,12 +45,19 @@ class futured(partial):
             fs.append(future)
         return ((future._key, future.result()) for future in cls.as_completed(fs, **kwargs))
 
-    def map(self, *iterables, **kwargs):
+    def map(self, *iterables, **kwargs) -> Iterator:
         """Asynchronously map function.
 
         :param kwargs: keyword options for :meth:`results`
         """
         return self.results(map(self, *iterables), **kwargs)
+
+    def starmap(self, iterable: Iterable, **kwargs) -> Iterator:
+        """Asynchronously starmap function.
+
+        :param kwargs: keyword options for :meth:`results`
+        """
+        return self.results(itertools.starmap(self, iterable), **kwargs)
 
     def mapzip(self, iterable: Iterable, **kwargs) -> Iterator:
         """Generate arg, result pairs as completed.
@@ -123,7 +130,7 @@ class asynced(futured):
         """Generate (key, result) pairs as completed from (key, future) pairs."""
         return cls.results(itertools.starmap(cls.pair, iterable), as_completed=True, **kwargs)
 
-    def run(self, *args, **kwargs):
+    def run(self: Callable, *args, **kwargs):
         """Synchronously call and run coroutine or asynchronous iterator."""
         coro = self(*args, **kwargs)
         if isinstance(coro, AsyncIterable):
@@ -136,7 +143,7 @@ class looped:
 
     Analogous to loop.run_until_complete for coroutines.
     """
-    def __init__(self, aiterable: AsyncIterable, *, loop=None) -> None:
+    def __init__(self, aiterable: AsyncIterable, *, loop=None):
         self.anext = aiterable.__aiter__().__anext__
         self.loop = loop or asyncio.get_event_loop()
         self.future = asyncio.ensure_future(self.anext(), loop=self.loop)
@@ -177,11 +184,11 @@ class command(subprocess.Popen):
         """Return stdout or raise stderr."""
         return self.check(self.args, *self.communicate(**kwargs))
 
-    def pipe(self, *args, **kwargs):
+    def pipe(self, *args, **kwargs) -> 'command':
         """Pipe stdout to the next command's stdin."""
         return type(self)(*args, stdin=self.stdout, **kwargs)
 
-    def __or__(self, other: Iterable):
+    def __or__(self, other: Iterable) -> 'command':
         """Alias of :meth:`pipe`."""
         return self.pipe(*other)
 
@@ -202,7 +209,7 @@ class Results(queue.Queue):
         return not status
 
 
-def forked(values, max_workers=None):
+def forked(values: Iterable, max_workers: int = None) -> Iterator:
     """Generate each value in its own child process and wait in the parent."""
     max_workers = max_workers or os.cpu_count() or 1  # same default as ProcessPoolExecutor
     workers, results = 0, Results()
