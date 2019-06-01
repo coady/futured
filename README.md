@@ -7,6 +7,7 @@
 [![image](https://readthedocs.org/projects/futured/badge)](https://futured.readthedocs.io)
 [![image](https://requires.io/github/coady/futured/requirements.svg)](https://requires.io/github/coady/futured/requirements/)
 [![image](https://api.codeclimate.com/v1/badges/bdc33b8af847fbbecfce/maintainability)](https://codeclimate.com/github/coady/futured/maintainability)
+[![image](https://img.shields.io/badge/code%20style-black-000000.svg)](https://pypi.org/project/black/)
 
 Futured provides a simple consistent interface for concurrent functional
 programming in Python. It can wrap any callable to return
@@ -69,7 +70,7 @@ processed(max_workers=...)(func, ...)
 Futures can be registered at creation, or appended to the list of tasks.
 
 ```python
-with threaded.waiting(future,... ) as tasks:
+with threaded.waiting(*fs) as tasks:
     tasks.append(future)
 tasks  # results in order
 ```
@@ -127,6 +128,10 @@ for value in forked(values, max_workers=...):
     $ pytest [--cov]
 
 # Changes
+dev
+* Executed functions are context managers
+* `starmap` supported
+
 0.3
 * `forked` has optional maximum number of workers
 * `waiting` context manager

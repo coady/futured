@@ -9,6 +9,7 @@ from parametrized import parametrized
 from futured import futured, threaded, processed, asynced, command, forked, decorated
 
 delays = [0.2, 0.1, 0.05]
+workers = {'max_workers': len(delays)}
 
 
 @contextlib.contextmanager
@@ -64,7 +65,7 @@ def test_results():
 
 
 @parametrized
-def test_map(coro=[threaded(max_workers=len(delays))(sleep), processed(max_workers=len(delays))(sleep), asleep]):
+def test_map(coro=[threaded(**workers)(sleep), processed(**workers)(sleep), asleep]):
     with timed():
         assert list(coro.map(delays)) == delays
     with timed():
@@ -136,7 +137,9 @@ def test_context():
 def test_distributed():
     pytest.importorskip('distributed')
     from futured import distributed
+
     with distributed(time.sleep) as dsleep:
-        assert list(dsleep.map(delays)) == list(dsleep.map(delays, as_completed=True)) == [None] * len(delays)
+        results = dsleep.map(delays, as_completed=True)
+        assert list(dsleep.map(delays)) == list(results) == [None] * len(delays)
     with pytest.raises(Exception):
         dsleep(0)

@@ -15,6 +15,7 @@ __version__ = '0.3'
 
 class futured(partial):
     """A partial function which returns futures."""
+
     as_completed = NotImplemented
 
     def __get__(self, instance, owner):
@@ -79,12 +80,13 @@ class futured(partial):
 
 class executed(futured):
     """Extensible base class for callables which require a ``submit`` method."""
+
     as_completed = futures.as_completed
     Executor = NotImplemented
 
     def __new__(cls, *args, **kwargs):
         if args:
-            return futured.__new__(cls, cls.Executor().submit, *args,  **kwargs)
+            return futured.__new__(cls, cls.Executor().submit, *args, **kwargs)
         return partial(futured.__new__, cls, cls.Executor(**kwargs).submit)
 
     def __enter__(self):
@@ -96,22 +98,27 @@ class executed(futured):
 
 class threaded(executed):
     """A partial function executed in its own thread pool."""
+
     Executor = futures.ThreadPoolExecutor
 
 
 class processed(executed):
     """A partial function executed in its own process pool."""
+
     Executor = futures.ProcessPoolExecutor
 
 
 with contextlib.suppress(ImportError):
+
     class distributed(executed):
         """A partial function executed by a dask distributed client."""
+
         from distributed import as_completed, Client as Executor
 
 
 class asynced(futured):
     """A partial coroutine."""
+
     @classmethod
     def results(cls, fs: Iterable, *, loop=None, as_completed=False, **kwargs) -> Iterator:
         """Generate results concurrently from coroutines or futures."""
@@ -143,6 +150,7 @@ class looped:
 
     Analogous to loop.run_until_complete for coroutines.
     """
+
     def __init__(self, aiterable: AsyncIterable, *, loop=None):
         self.anext = aiterable.__aiter__().__anext__
         self.loop = loop or asyncio.get_event_loop()
@@ -165,6 +173,7 @@ class looped:
 
 class command(subprocess.Popen):
     """Asynchronous subprocess with a future compatible interface."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
 
