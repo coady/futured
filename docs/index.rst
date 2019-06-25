@@ -12,6 +12,7 @@ Welcome to futured's documentation!
 
    readme
    reference
+   examples
 
 Indices and tables
 ==================
