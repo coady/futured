@@ -9,10 +9,10 @@
 [![image](https://api.codeclimate.com/v1/badges/bdc33b8af847fbbecfce/maintainability)](https://codeclimate.com/github/coady/futured/maintainability)
 [![image](https://img.shields.io/badge/code%20style-black-000000.svg)](https://pypi.org/project/black/)
 
-Futured provides a simple consistent interface for concurrent functional
-programming in Python. It can wrap any callable to return
-`concurrent.futures.Future` objects, and it can wrap any async coroutine
-to return `asyncio.Future` objects.
+Futured provides a simple consistent interface for concurrent functional programming in Python.
+It wraps any callable to return a `concurrent.futures.Future`,
+wraps any async coroutine to return an `asyncio.Future`,
+and provides concurrent iterators and context managers for futures.
 
 # Usage
 ## threaded, processed
@@ -23,39 +23,15 @@ from futured import threaded, processed
 import requests
 
 fetch = threaded(requests.Session().get)
-fetch(url)  # returns Future
+fetch(url)  # return Future
 
 fs = (fetch(url + path) for path in paths)
-fetch.results(fs)  # generates results in order
-fetch.results(fs, timeout=...)  # generates results as completed
+threaded.results(fs)  # generate results from futures
+threaded.results(fs, timeout=...)  # generate results as completed
 
-fetch.map(urls)  # generates results in order
-fetch.map(urls, timeout=...)  # generates results as completed
-fetch.mapzip(urls)  # generates (url, result) pairs as completed
-```
-
-Naturally `futured` wrappers can be used as decorators, but arguments can also be partially bound.
-
-```python
-@threaded
-def slow():
-   ...
-
-fetch = threaded(requests.Session().get, url)
-fetch(params=...)
-```
-
-Methods are supported, as well as a `decorated` utility for
-automatically subclassing.
-
-```python
-from futured import decorated
-
-FutureSession = decorated(requests.Session, request=threaded)
-
- # equivalent to
-class FutureSession(requests.Session):
-    request = threaded(requests.Session.request)
+fetch.map(urls)  # generate results in order
+fetch.map(urls, timeout=...)  # generate results as completed
+fetch.mapzip(urls)  # generate (url, result) pairs as completed
 ```
 
 Thread and process pool executors may be used as context managers,
@@ -72,24 +48,59 @@ Futures can be registered at creation, or appended to the list of tasks.
 ```python
 with threaded.waiting(*fs) as tasks:
     tasks.append(future)
-tasks  # results in order
+tasks  # list of completed results
 ```
 
 ## asynced
-The same interface works for `asyncio`. For convenience, there's also a synchronous `run` method.
+The same interface works for `asyncio`.
 
 ```python
 from futured import asynced
 import aiohttp
 
 fetch = asynced(aiohttp.ClientSession().get)
-fetch(url)  # returns coroutine
-fetch.run(url)  # single synchronous call
+fetch(url)  # return coroutine
 
- # generate results as described above
-fetch.results(fs)
-fetch.map(urls)
-fetch.mapzip(urls)
+asynced.results(fs)  # generate results from futures
+asynced.results(fs, timeout=...)  # generate results as completed
+
+fetch.map(urls)  # generate results in order
+fetch.map(urls, timeout=...)  # generate results as completed
+fetch.mapzip(urls)  # generate (url, result) pairs as completed
+```
+
+`asynced` provides utilities for calling coroutines from a synchronous context.
+`waiting` is similar to [trio's nursery](https://trio.readthedocs.io/en/latest/reference-core.html#nurseries-and-spawning),
+but returns results from a synchronous `with` block.
+
+```python
+asynced.run(async_func, ...)  # call and run until complete
+asynced.run(async_gen, ...)  # call and run synchronous iterator
+with asynced.waiting(*fs) as tasks:  # concurrent coroutines completed in a block
+```
+
+## decorators
+Naturally `futured` wrappers can be used as decorators, but arguments can also be partially bound.
+
+```python
+@threaded
+def slow():
+   ...
+
+fetch = threaded(requests.Session().get, url)
+fetch(params=...)
+```
+
+Methods are supported, as well as a `decorated` utility for automatically subclassing.
+
+```python
+from futured import decorated
+
+FutureSession = decorated(requests.Session, request=threaded)
+
+ # equivalent to
+class FutureSession(requests.Session):
+    request = threaded(requests.Session.request)
 ```
 
 ## command
@@ -98,10 +109,10 @@ fetch.mapzip(urls)
 ```python
 from futured import futured, command
 
-command('ls').result()  # returns stdout or raises stderr
+command('ls').result()  # return stdout or raises stderr
 command('ls').pipe('wc')  # pipes into next command, or | ('wc',... )
 for line in command('ls'):  # iterable lines
-command.coroutine('ls')  # returns coroutine
+command.coroutine('ls')  # return coroutine
 
 futured(command, 'ls')  # supports `map` interface
 asynced(command.coroutine, 'ls')  # supports `map` interface with timeout
