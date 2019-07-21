@@ -139,7 +139,7 @@ for value in forked(values, max_workers=...):
     $ pytest [--cov]
 
 # Changes
-dev
+1.0
 * Executed functions are context managers
 * `starmap` supported
 
