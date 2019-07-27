@@ -8,7 +8,7 @@ import subprocess
 import types
 from concurrent import futures
 from functools import partial
-from typing import AsyncIterable, Callable, Iterable, Iterator
+from typing import AsyncIterable, Callable, Iterable, Iterator, MutableSet
 
 __version__ = '1.0'
 
@@ -16,7 +16,7 @@ __version__ = '1.0'
 class futured(partial):
     """A partial function which returns futures."""
 
-    as_completed = NotImplemented
+    as_completed = wait = NotImplemented
 
     def __get__(self, instance, owner):
         return self if instance is None else types.MethodType(self, instance)
@@ -40,11 +40,8 @@ class futured(partial):
         :param iterable: key, future pairs
         :param kwargs: as completed options, e.g., timeout
         """
-        fs = []
-        for key, future in iterable:
-            future._key = key
-            fs.append(future)
-        return ((future._key, future.result()) for future in cls.as_completed(fs, **kwargs))
+        keys = dict(map(reversed, iterable))  # type: ignore
+        return ((keys[future], future.result()) for future in cls.as_completed(keys, **kwargs))
 
     def map(self, *iterables, **kwargs) -> Iterator:
         """Asynchronously map function.
@@ -77,11 +74,20 @@ class futured(partial):
         finally:
             fs[:] = cls.results(fs, **kwargs)
 
+    @classmethod
+    def stream(cls, fs: MutableSet):
+        """Generate futures as completed from a mutable set."""
+        while fs:
+            done, pending = cls.wait(fs, return_when=futures.FIRST_COMPLETED)
+            fs.__init__(pending)  # type: ignore
+            yield from done
+
 
 class executed(futured):
     """Extensible base class for callables which require a ``submit`` method."""
 
     as_completed = futures.as_completed
+    wait = futures.wait
     Executor = NotImplemented
 
     def __new__(cls, *args, **kwargs):
@@ -113,7 +119,7 @@ with contextlib.suppress(ImportError):
     class distributed(executed):
         """A partial function executed by a dask distributed client."""
 
-        from distributed import as_completed, Client as Executor
+        from distributed import as_completed, wait, Client as Executor
 
 
 class asynced(futured):
@@ -143,6 +149,16 @@ class asynced(futured):
         if isinstance(coro, AsyncIterable):
             return looped(coro)
         return asyncio.get_event_loop().run_until_complete(coro)
+
+    @classmethod
+    def stream(cls, fs: MutableSet, *, loop=None):
+        """Generate futures as completed from a mutable set."""
+        loop = loop or asyncio.get_event_loop()
+        while fs:
+            coro = asyncio.wait(fs, loop=loop, return_when=asyncio.FIRST_COMPLETED)
+            done, pending = loop.run_until_complete(coro)
+            fs.__init__(pending)  # type: ignore
+            yield from done
 
 
 class looped:

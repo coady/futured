@@ -134,6 +134,15 @@ def test_context():
     assert tasks == ['first', 'second']
 
 
+@parametrized
+def test_stream(coro=[threaded(**workers)(sleep), asleep]):
+    fs = set(map(coro, delays[1:]))
+    tasks = coro.stream(fs)
+    assert next(tasks).result() == delays[-1]
+    fs.add(coro(delays[0]))
+    assert list(tasks)[-1].result() == delays[0]
+
+
 def test_distributed():
     pytest.importorskip('distributed')
     from futured import distributed
