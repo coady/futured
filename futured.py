@@ -8,7 +8,7 @@ import subprocess
 import types
 from concurrent import futures
 from functools import partial
-from typing import AsyncIterable, Callable, Iterable, Iterator, MutableSet
+from typing import AsyncIterable, Callable, Iterable, Iterator, MutableSet, Sequence
 
 __version__ = '1.0'
 
@@ -75,12 +75,30 @@ class futured(partial):
             fs[:] = cls.results(fs, **kwargs)
 
     @classmethod
-    def stream(cls, fs: MutableSet):
-        """Generate futures as completed from a mutable set."""
+    def stream(cls, fs: MutableSet, **kwargs) -> Iterator:
+        """Generate futures as completed from a mutable set.
+
+        Iteration will consume futures from the set, and it can be updated while in use.
+        """
         while fs:
-            done, pending = cls.wait(fs, return_when=futures.FIRST_COMPLETED)
+            done, pending = cls.wait(fs, return_when='FIRST_COMPLETED', **kwargs)
             fs.__init__(pending)  # type: ignore
             yield from done
+
+    task = partial.__call__
+
+    def streamzip(self, queue: Sequence, **kwargs) -> Iterator:
+        """Generate arg, future pairs as completed from mapping function.
+
+        The queue can be extended while in use.
+        """
+        pool, start = {}, 0  # type: ignore
+        while pool or queue[start:]:
+            pool.update({self.task(arg, **kwargs): arg for arg in queue[start:]})
+            start = len(queue)
+            done, _ = type(self).wait(pool, return_when='FIRST_COMPLETED', **kwargs)
+            for future in done:
+                yield pool.pop(future), future
 
 
 class executed(futured):
@@ -123,11 +141,13 @@ with contextlib.suppress(ImportError):
 
 
 class asynced(futured):
-    """A partial coroutine."""
+    """A partial coroutine.
+
+    Anywhere futures are expected, coroutines are also supported.
+    """
 
     @classmethod
     def results(cls, fs: Iterable, *, loop=None, as_completed=False, **kwargs) -> Iterator:
-        """Generate results concurrently from coroutines or futures."""
         loop = loop or asyncio.get_event_loop()
         fs = [asyncio.ensure_future(future, loop=loop) for future in fs]
         if as_completed or kwargs:
@@ -140,7 +160,6 @@ class asynced(futured):
 
     @classmethod
     def items(cls, iterable: Iterable, **kwargs) -> Iterator:
-        """Generate (key, result) pairs as completed from (key, future) pairs."""
         return cls.results(itertools.starmap(cls.pair, iterable), as_completed=True, **kwargs)
 
     def run(self: Callable, *args, **kwargs):
@@ -151,14 +170,12 @@ class asynced(futured):
         return asyncio.get_event_loop().run_until_complete(coro)
 
     @classmethod
-    def stream(cls, fs: MutableSet, *, loop=None):
-        """Generate futures as completed from a mutable set."""
+    def wait(cls, fs: Iterable, *, loop=None, **kwargs):
         loop = loop or asyncio.get_event_loop()
-        while fs:
-            coro = asyncio.wait(fs, loop=loop, return_when=asyncio.FIRST_COMPLETED)
-            done, pending = loop.run_until_complete(coro)
-            fs.__init__(pending)  # type: ignore
-            yield from done
+        return loop.run_until_complete(asyncio.wait(fs, loop=loop, **kwargs))
+
+    def task(self, arg, **kwargs):
+        return asyncio.ensure_future(self(arg), **kwargs)
 
 
 class looped:

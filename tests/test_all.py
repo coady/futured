@@ -141,6 +141,13 @@ def test_stream(coro=[threaded(**workers)(sleep), asleep]):
     assert next(tasks).result() == delays[-1]
     fs.add(coro(delays[0]))
     assert list(tasks)[-1].result() == delays[0]
+    queue = delays[1:]
+    items = coro.streamzip(queue)
+    delay, future = next(items)
+    assert delay == future.result() == delays[-1]
+    queue.append(delays[0])
+    item, (delay, future) = items
+    assert delay == future.result() == delays[0]
 
 
 def test_distributed():

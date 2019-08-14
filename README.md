@@ -139,6 +139,9 @@ for value in forked(values, max_workers=...):
     $ pytest [--cov]
 
 # Changes
+dev
+* Stream completed futures from a pending pool
+
 1.0
 * Executed functions are context managers
 * `starmap` supported

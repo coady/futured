@@ -7,6 +7,7 @@ futured
 .. autoclass:: futured
    :show-inheritance:
    :members:
+   :exclude-members: task
 
 .. autoclass:: threaded
    :show-inheritance:
@@ -27,6 +28,7 @@ asynced
 .. autoclass:: asynced
    :show-inheritance:
    :members:
+   :exclude-members: task
 
 .. autoclass:: looped
 
