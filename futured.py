@@ -8,7 +8,7 @@ import subprocess
 import types
 from concurrent import futures
 from functools import partial
-from typing import AsyncIterable, Callable, Iterable, Iterator, MutableSet, Sequence
+from typing import AnyStr, AsyncIterable, Callable, Iterable, Iterator, MutableSet, Sequence
 
 __version__ = '1.0'
 
@@ -151,7 +151,7 @@ class asynced(futured):
         loop = loop or asyncio.get_event_loop()
         fs = [asyncio.ensure_future(future, loop=loop) for future in fs]
         if as_completed or kwargs:
-            fs = asyncio.as_completed(fs, loop=loop, **kwargs)
+            fs = asyncio.as_completed(fs, **kwargs)
         return map(loop.run_until_complete, fs)
 
     @staticmethod
@@ -170,9 +170,8 @@ class asynced(futured):
         return asyncio.get_event_loop().run_until_complete(coro)
 
     @classmethod
-    def wait(cls, fs: Iterable, *, loop=None, **kwargs):
-        loop = loop or asyncio.get_event_loop()
-        return loop.run_until_complete(asyncio.wait(fs, loop=loop, **kwargs))
+    def wait(cls, fs: Iterable, **kwargs) -> tuple:
+        return cls.run(asyncio.wait, fs, **kwargs)
 
     def task(self, arg, **kwargs):
         return asyncio.ensure_future(self(arg), **kwargs)
@@ -222,7 +221,7 @@ class command(subprocess.Popen):
         self = await create(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
         return cls.check(self, args, *(await self.communicate()))
 
-    def result(self, **kwargs):
+    def result(self, **kwargs) -> AnyStr:
         """Return stdout or raise stderr."""
         return self.check(self.args, *self.communicate(**kwargs))
 
