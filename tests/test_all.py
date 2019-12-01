@@ -48,7 +48,7 @@ class sleeps:
 def test_class():
     fstr = decorated(str, lower=threaded)
     assert fstr('Test').lower().result() == 'test'
-    st, = fstr.lower.map(['Test'])
+    (st,) = fstr.lower.map(['Test'])
     assert st == 'test'
 
 
@@ -90,7 +90,7 @@ def test_command():
         sleep('1').result(timeout=0)
     count = int(command('ls').pipe('wc', '-l').result().strip())
     assert count and count == len(list(command('ls')))
-    line, = command('ls') | ('wc',)
+    (line,) = command('ls') | ('wc',)
     assert len(line.split()) == 3
     with pytest.raises(subprocess.CalledProcessError):
         asynced.run(command.coroutine, 'sleep')

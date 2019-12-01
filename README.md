@@ -56,9 +56,9 @@ The same interface works for `asyncio`.
 
 ```python
 from futured import asynced
-import aiohttp
+import httpx
 
-fetch = asynced(aiohttp.ClientSession().get)
+fetch = asynced(httpx.Client().get)
 fetch(url)  # return coroutine
 
 asynced.results(fs)  # generate results from futures
