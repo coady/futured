@@ -8,6 +8,7 @@
 [![image](https://requires.io/github/coady/futured/requirements.svg)](https://requires.io/github/coady/futured/requirements/)
 [![image](https://api.codeclimate.com/v1/badges/bdc33b8af847fbbecfce/maintainability)](https://codeclimate.com/github/coady/futured/maintainability)
 [![image](https://img.shields.io/badge/code%20style-black-000000.svg)](https://pypi.org/project/black/)
+[![image](http://mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 Futured provides a simple consistent interface for concurrent functional programming in Python.
 It wraps any callable to return a `concurrent.futures.Future`,
