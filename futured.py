@@ -10,7 +10,7 @@ from concurrent import futures
 from functools import partial
 from typing import AnyStr, AsyncIterable, Callable, Iterable, Iterator, MutableSet, Sequence
 
-__version__ = '1.0'
+__version__ = '1.1'
 
 
 class futured(partial):
@@ -43,7 +43,7 @@ class futured(partial):
         keys = dict(map(reversed, iterable))  # type: ignore
         return ((keys[future], future.result()) for future in cls.as_completed(keys, **kwargs))
 
-    def map(self, *iterables, **kwargs) -> Iterator:
+    def map(self, *iterables: Iterable, **kwargs) -> Iterator:
         """Asynchronously map function.
 
         :param kwargs: keyword options for :meth:`results`
@@ -137,7 +137,7 @@ with contextlib.suppress(ImportError):
     class distributed(executed):
         """A partial function executed by a dask distributed client."""
 
-        from distributed import as_completed, wait, Client as Executor
+        from distributed import as_completed, wait, Client as Executor  # type: ignore
 
 
 class asynced(futured):
@@ -268,7 +268,7 @@ def forked(values: Iterable, max_workers: int = None) -> Iterator:
         workers -= results.get()
 
 
-def decorated(base: type, **decorators) -> type:
+def decorated(base: type, **decorators: Callable) -> type:
     """Return subclass with decorated methods."""
     namespace = {name: decorators[name](getattr(base, name)) for name in decorators}
     return type(base.__name__, (base,), namespace)

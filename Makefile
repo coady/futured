@@ -5,5 +5,5 @@ check:
 	python3 setup.py $@ -ms
 	black --check -q .
 	flake8
-	mypy futured.py --ignore-missing-imports
+	mypy -p futured
 	pytest --cov --cov-fail-under=100

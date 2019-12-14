@@ -140,7 +140,7 @@ for value in forked(values, max_workers=...):
     $ pytest [--cov]
 
 # Changes
-dev
+1.1
 * Stream completed futures from a pending pool
 
 1.0
