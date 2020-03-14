@@ -131,13 +131,16 @@ for value in forked(values, max_workers=...):
 ```
 
 # Installation
-
-    $ pip install futured
+```console
+% pip install futured
+```
 
 # Tests
 100% branch coverage.
 
-    $ pytest [--cov]
+```console
+% pytest [--cov]
+```
 
 # Changes
 1.1

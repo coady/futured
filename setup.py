@@ -14,7 +14,7 @@ setup(
     license='Apache Software License',
     py_modules=['futured'],
     extras_require={'docs': ['m2r', 'nbsphinx', 'jupyter', 'nest_asyncio', 'httpx']},
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     tests_require=['pytest-cov', 'pytest-parametrized'],
     keywords='concurrent futures threads processes async asyncio',
     classifiers=[
@@ -24,7 +24,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
