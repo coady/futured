@@ -8,7 +8,7 @@ import pytest
 from parametrized import parametrized
 from futured import futured, threaded, processed, asynced, command, forked, decorated
 
-delays = [0.2, 0.1, 0.05]
+delays = [0.3, 0.25, 0.2]
 workers = {'max_workers': len(delays)}
 
 

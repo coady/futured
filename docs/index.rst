@@ -1,9 +1,8 @@
-.. futured documentation master file, created by
-   sphinx-quickstart on Thu Nov 29 16:10:30 2018.
+.. futured documentation master file, created by sphinx-quickstart.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to futured's documentation!
+Welcome to futured's documentation.
 ===================================
 
 .. toctree::

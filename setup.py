@@ -13,7 +13,7 @@ setup(
     project_urls={'Documentation': 'https://futured.readthedocs.io'},
     license='Apache Software License',
     py_modules=['futured'],
-    extras_require={'docs': ['m2r', 'nbsphinx', 'jupyter', 'nest_asyncio', 'httpx']},
+    extras_require={'docs': ['m2r', 'nbsphinx', 'jupyter', 'nest_asyncio', 'httpx', 'sphinx<3']},
     python_requires='>=3.6',
     tests_require=['pytest-cov', 'pytest-parametrized'],
     keywords='concurrent futures threads processes async asyncio',
