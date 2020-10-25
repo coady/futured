@@ -12,7 +12,9 @@ setup(
     url='https://github.com/coady/futured',
     project_urls={'Documentation': 'https://coady.github.io/futured'},
     license='Apache Software License',
-    py_modules=['futured'],
+    packages=['futured'],
+    package_data={'futured': ['py.typed']},
+    zip_safe=False,
     extras_require={'docs': open('docs/requirements.txt').read().splitlines()},
     python_requires='>=3.6',
     tests_require=['pytest-cov', 'pytest-parametrized'],
@@ -29,5 +31,6 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Topic :: Software Development :: Libraries :: Python Modules',
+        'Typing :: Typed',
     ],
 )

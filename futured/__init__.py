@@ -16,7 +16,8 @@ __version__ = '1.1'
 class futured(partial):
     """A partial function which returns futures."""
 
-    as_completed = wait = NotImplemented
+    as_completed: Callable = NotImplemented
+    wait: Callable = NotImplemented
 
     def __get__(self, instance, owner):
         return self if instance is None else types.MethodType(self, instance)
@@ -111,7 +112,7 @@ class executed(futured):
 
     as_completed = futures.as_completed
     wait = futures.wait
-    Executor = NotImplemented
+    Executor = futures.Executor
 
     def __new__(cls, *args, **kwargs):
         if args:

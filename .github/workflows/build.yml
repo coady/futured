@@ -30,9 +30,10 @@ jobs:
       with:
         python-version: 3.x
     - run: |
-        pip install black flake8
+        pip install black flake8 mypy
         black --check .
         flake8
+        mypy -p futured
 
   docs:
     runs-on: ubuntu-latest
