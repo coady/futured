@@ -25,8 +25,9 @@ class futured(partial):
     def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
         """Generate results concurrently from futures, by default in order.
 
-        :param fs: iterable of futures
-        :param as_completed, kwargs: generate results as completed with options, e.g., timeout
+        Args:
+            fs: iterable of futures
+            as_completed, kwargs: generate results as completed with options, e.g., timeout
         """
         fs = list(fs)  # ensure futures are executing
         if as_completed or kwargs:
@@ -37,8 +38,9 @@ class futured(partial):
     def items(cls, iterable: Iterable, **kwargs) -> Iterator:
         """Generate key, result pairs as completed from futures.
 
-        :param iterable: key, future pairs
-        :param kwargs: as completed options, e.g., timeout
+        Args:
+            iterable: key, future pairs
+            kwargs: as completed options, e.g., timeout
         """
         keys = dict(map(reversed, iterable))  # type: ignore
         return ((keys[future], future.result()) for future in cls.as_completed(keys, **kwargs))
@@ -46,21 +48,24 @@ class futured(partial):
     def map(self, *iterables: Iterable, **kwargs) -> Iterator:
         """Asynchronously map function.
 
-        :param kwargs: keyword options for :meth:`results`
+        Args:
+            kwargs: keyword options for :meth:`results`
         """
         return self.results(map(self, *iterables), **kwargs)
 
     def starmap(self, iterable: Iterable, **kwargs) -> Iterator:
         """Asynchronously starmap function.
 
-        :param kwargs: keyword options for :meth:`results`
+        Args:
+            kwargs: keyword options for :meth:`results`
         """
         return self.results(itertools.starmap(self, iterable), **kwargs)
 
     def mapzip(self, iterable: Iterable, **kwargs) -> Iterator:
         """Generate arg, result pairs as completed.
 
-        :param kwargs: keyword options for :meth:`items`
+        Args:
+            kwargs: keyword options for :meth:`items`
         """
         return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
 

@@ -10,20 +10,10 @@ setup(
     author='Aric Coady',
     author_email='aric.coady@gmail.com',
     url='https://github.com/coady/futured',
-    project_urls={'Documentation': 'https://futured.readthedocs.io'},
+    project_urls={'Documentation': 'https://coady.github.io/futured'},
     license='Apache Software License',
     py_modules=['futured'],
-    extras_require={
-        'docs': [
-            'recommonmark',
-            'tornado<5',
-            'nbsphinx',
-            'jupyter_client',
-            'ipykernel',
-            'nest_asyncio',
-            'httpx',
-        ]
-    },
+    extras_require={'docs': open('docs/requirements.txt').read().splitlines()},
     python_requires='>=3.6',
     tests_require=['pytest-cov', 'pytest-parametrized'],
     keywords='concurrent futures threads processes async asyncio',
@@ -37,6 +27,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )

@@ -1,0 +1,22 @@
+site_name: futured
+site_description: Functional interface for concurrent futures, including asynchronous I/O.
+theme: material
+
+repo_name: coady/futured
+repo_url: https://github.com/coady/futured
+edit_uri: ""
+
+nav:
+  - Introduction: index.md
+  - Reference: reference.md
+  - Examples: examples.ipynb
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          rendering:
+            show_root_heading: true
+  - mkdocs-jupyter:
+      execute: True

@@ -2,9 +2,8 @@
 ![image](https://img.shields.io/pypi/pyversions/futured.svg)
 [![image](https://pepy.tech/badge/futured)](https://pepy.tech/project/futured)
 ![image](https://img.shields.io/pypi/status/futured.svg)
-[![image](https://img.shields.io/travis/coady/futured.svg)](https://travis-ci.org/coady/futured)
+[![image](https://github.com/coady/futured/workflows/build/badge.svg)](https://github.com/coady/futured/actions)
 [![image](https://img.shields.io/codecov/c/github/coady/futured.svg)](https://codecov.io/github/coady/futured)
-[![image](https://readthedocs.org/projects/futured/badge)](https://futured.readthedocs.io)
 [![image](https://api.codeclimate.com/v1/badges/bdc33b8af847fbbecfce/maintainability)](https://codeclimate.com/github/coady/futured/maintainability)
 [![image](https://img.shields.io/badge/code%20style-black-000000.svg)](https://pypi.org/project/black/)
 [![image](http://mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
@@ -14,8 +13,8 @@ It wraps any callable to return a `concurrent.futures.Future`,
 wraps any async coroutine to return an `asyncio.Future`,
 and provides concurrent iterators and context managers for futures.
 
-# Usage
-## threaded, processed
+## Usage
+### threaded, processed
 Transform any callable into one which runs in a thread or process pool, and returns a future.
 
 ```python
@@ -51,7 +50,7 @@ with threaded.waiting(*fs) as tasks:
 tasks  # list of completed results
 ```
 
-## asynced
+### asynced
 The same interface works for `asyncio`.
 
 ```python
@@ -79,7 +78,7 @@ asynced.run(async_gen, ...)  # call and run synchronous iterator
 with asynced.waiting(*fs) as tasks:  # concurrent coroutines completed in a block
 ```
 
-## decorators
+### decorators
 Naturally `futured` wrappers can be used as decorators, but arguments can also be partially bound.
 
 ```python
@@ -103,7 +102,7 @@ class FutureSession(requests.Session):
     request = threaded(requests.Session.request)
 ```
 
-## command
+### command
 `command` wraps `subprocess.Popen` to provide a `Future` compatible interface.
 
 ```python
@@ -118,7 +117,7 @@ futured(command, 'ls')  # supports `map` interface
 asynced(command.coroutine, 'ls')  # supports `map` interface with timeout
 ```
 
-## forked
+### forked
 `forked` allows iteration in separate child processes.
 
 ```python
@@ -129,33 +128,37 @@ for value in forked(values, max_workers=...):
  # in parent after children have exited
 ```
 
-# Installation
+## Installation
 ```console
 % pip install futured
 ```
 
-# Tests
+## Tests
 100% branch coverage.
 
 ```console
 % pytest [--cov]
 ```
 
-# Changes
+## Changes
 1.1
+
 * Stream completed futures from a pending pool
 
 1.0
+
 * Executed functions are context managers
 * `starmap` supported
 
 0.3
+
 * `forked` has optional maximum number of workers
 * `waiting` context manager
 * `command` pipes (`|`)
 * `distributed.Client` support
 
 0.2
+
 * `command.coroutine` creates asyncio subprocesses
 * `futured.mapzip` generates results zipped with arguments
 * `asynced.run` supports asynchronous iterators
