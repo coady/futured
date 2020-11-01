@@ -50,7 +50,7 @@ class futured(partial):
         """Asynchronously map function.
 
         Args:
-            kwargs: keyword options for :meth:`results`
+            kwargs: keyword options for [results][futured.futured.results]
         """
         return self.results(map(self, *iterables), **kwargs)
 
@@ -58,7 +58,7 @@ class futured(partial):
         """Asynchronously starmap function.
 
         Args:
-            kwargs: keyword options for :meth:`results`
+            kwargs: keyword options for [results][futured.futured.results]
         """
         return self.results(itertools.starmap(self, iterable), **kwargs)
 
@@ -66,14 +66,14 @@ class futured(partial):
         """Generate arg, result pairs as completed.
 
         Args:
-            kwargs: keyword options for :meth:`items`
+            kwargs: keyword options for [items][futured.futured.items]
         """
         return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
 
     @classmethod
     @contextlib.contextmanager
     def waiting(cls, *fs, **kwargs):
-        """Return context manager which waits on :meth:`results`."""
+        """Return context manager which waits on [results][futured.futured.results]."""
         fs = list(fs)
         try:
             yield fs
@@ -236,7 +236,7 @@ class command(subprocess.Popen):
         return type(self)(*args, stdin=self.stdout, **kwargs)
 
     def __or__(self, other: Iterable) -> 'command':
-        """Alias of :meth:`pipe`."""
+        """Alias of [pipe][futured.command.pipe]."""
         return self.pipe(*other)
 
     def __iter__(self):

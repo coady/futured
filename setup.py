@@ -15,7 +15,6 @@ setup(
     packages=['futured'],
     package_data={'futured': ['py.typed']},
     zip_safe=False,
-    extras_require={'docs': open('docs/requirements.txt').read().splitlines()},
     python_requires='>=3.6',
     tests_require=['pytest-cov', 'pytest-parametrized'],
     keywords='concurrent futures threads processes async asyncio',
