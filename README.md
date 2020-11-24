@@ -4,14 +4,11 @@
 ![image](https://img.shields.io/pypi/status/futured.svg)
 [![image](https://github.com/coady/futured/workflows/build/badge.svg)](https://github.com/coady/futured/actions)
 [![image](https://codecov.io/gh/coady/futured/branch/main/graph/badge.svg)](https://codecov.io/github/coady/futured)
-[![image](https://requires.io/github/coady/futured/requirements.svg)](https://requires.io/github/coady/futured/requirements/)
+[![image](https://github.com/coady/futured/workflows/codeql/badge.svg)](https://github.com/coady/futured/security/code-scanning)
 [![image](https://img.shields.io/badge/code%20style-black-000000.svg)](https://pypi.org/project/black/)
 [![image](http://mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
-Futured provides a simple consistent interface for concurrent functional programming in Python.
-It wraps any callable to return a `concurrent.futures.Future`,
-wraps any async coroutine to return an `asyncio.Future`,
-and provides concurrent iterators and context managers for futures.
+Futured provides a simple consistent interface for concurrent functional programming in Python. It wraps any callable to return a `concurrent.futures.Future`, wraps any async coroutine to return an `asyncio.Future`, and provides concurrent iterators and context managers for futures.
 
 ## Usage
 ### threaded, processed
@@ -41,8 +38,7 @@ threaded(max_workers=...)(func, ...)
 processed(max_workers=...)(func, ...)
 ```
 
-`futured` classes have a `waiting` context manager which collects results from tasks.
-Futures can be registered at creation, or appended to the list of tasks.
+`futured` classes have a `waiting` context manager which collects results from tasks. Futures can be registered at creation, or appended to the list of tasks.
 
 ```python
 with threaded.waiting(*fs) as tasks:
@@ -68,9 +64,7 @@ fetch.map(urls, timeout=...)  # generate results as completed
 fetch.mapzip(urls)  # generate (url, result) pairs as completed
 ```
 
-`asynced` provides utilities for calling coroutines from a synchronous context.
-`waiting` is similar to [trio's nursery](https://trio.readthedocs.io/en/latest/reference-core.html#nurseries-and-spawning),
-but returns results from a synchronous `with` block.
+`asynced` provides utilities for calling coroutines from a synchronous context. `waiting` is similar to [trio's nursery](https://trio.readthedocs.io/en/latest/reference-core.html#nurseries-and-spawning), but returns results from a synchronous `with` block.
 
 ```python
 asynced.run(async_func, ...)  # call and run until complete
