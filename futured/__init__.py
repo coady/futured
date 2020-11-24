@@ -10,7 +10,7 @@ from concurrent import futures
 from functools import partial
 from typing import AnyStr, AsyncIterable, Callable, Iterable, Iterator, MutableSet, Sequence
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 
 class futured(partial):
