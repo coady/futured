@@ -177,7 +177,7 @@ class asynced(futured):
 
     @classmethod
     def wait(cls, fs: Iterable, **kwargs) -> tuple:
-        return cls.run(asyncio.wait, fs, **kwargs)
+        return cls.run(asyncio.wait, map(asyncio.ensure_future, fs), **kwargs)
 
     def task(self, arg, **kwargs):
         return asyncio.ensure_future(self(arg), **kwargs)
