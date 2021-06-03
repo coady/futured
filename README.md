@@ -53,7 +53,7 @@ The same interface works for `asyncio`.
 from futured import asynced
 import httpx
 
-fetch = asynced(httpx.Client().get)
+fetch = asynced(httpx.AsyncClient().get)
 fetch(url)  # return coroutine
 
 asynced.results(fs)  # generate results from futures
@@ -135,28 +135,26 @@ for value in forked(values, max_workers=...):
 ```
 
 ## Changes
-1.2
+dev
+* Python >=3.7 required
 
+1.2
 * Python >=3.6 required
 
 1.1
-
 * Stream completed futures from a pending pool
 
 1.0
-
 * Executed functions are context managers
 * `starmap` supported
 
 0.3
-
 * `forked` has optional maximum number of workers
 * `waiting` context manager
 * `command` pipes (`|`)
 * `distributed.Client` support
 
 0.2
-
 * `command.coroutine` creates asyncio subprocesses
 * `futured.mapzip` generates results zipped with arguments
 * `asynced.run` supports asynchronous iterators
