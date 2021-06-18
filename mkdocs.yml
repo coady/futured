@@ -1,4 +1,5 @@
 site_name: futured
+site_url: https://coady.github.io/futured/
 site_description: Functional interface for concurrent futures, including asynchronous I/O.
 theme: material
 

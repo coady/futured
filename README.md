@@ -16,9 +16,9 @@ Transform any callable into one which runs in a thread or process pool, and retu
 
 ```python
 from futured import threaded, processed
-import requests
+import httpx
 
-fetch = threaded(requests.Session().get)
+fetch = threaded(httpx.Client().get)
 fetch(url)  # return Future
 
 fs = (fetch(url + path) for path in paths)
@@ -80,7 +80,7 @@ Naturally `futured` wrappers can be used as decorators, but arguments can also b
 def slow():
    ...
 
-fetch = threaded(requests.Session().get, url)
+fetch = threaded(httpx.Client().get, url)
 fetch(params=...)
 ```
 
@@ -89,11 +89,11 @@ Methods are supported, as well as a `decorated` utility for automatically subcla
 ```python
 from futured import decorated
 
-FutureSession = decorated(requests.Session, request=threaded)
+FutureClient = decorated(httpx.Client, request=threaded)
 
  # equivalent to
-class FutureSession(requests.Session):
-    request = threaded(requests.Session.request)
+class FutureClient(httpx.Client):
+    request = threaded(httpx.Client.request)
 ```
 
 ### command
