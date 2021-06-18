@@ -153,12 +153,11 @@ class asynced(futured):
     """
 
     @classmethod
-    def results(cls, fs: Iterable, *, loop=None, as_completed=False, **kwargs) -> Iterator:
-        loop = loop or asyncio.get_event_loop()
-        fs = [asyncio.ensure_future(future, loop=loop) for future in fs]
+    def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
+        fs = list(map(asyncio.ensure_future, fs))
         if as_completed or kwargs:
             fs = asyncio.as_completed(fs, **kwargs)
-        return map(loop.run_until_complete, fs)
+        return map(asyncio.get_event_loop().run_until_complete, fs)
 
     @staticmethod
     async def pair(key, future):
@@ -189,10 +188,9 @@ class looped:
     Analogous to loop.run_until_complete for coroutines.
     """
 
-    def __init__(self, aiterable: AsyncIterable, *, loop=None):
+    def __init__(self, aiterable: AsyncIterable):
         self.anext = aiterable.__aiter__().__anext__
-        self.loop = loop or asyncio.get_event_loop()
-        self.future = asyncio.ensure_future(self.anext(), loop=self.loop)
+        self.future = asyncio.ensure_future(self.anext())
 
     def __del__(self):  # suppress warning
         self.future.cancel()  # pragma: no cover
@@ -202,10 +200,10 @@ class looped:
 
     def __next__(self):
         try:
-            result = self.loop.run_until_complete(self.future)
+            result = asyncio.get_event_loop().run_until_complete(self.future)
         except StopAsyncIteration:
             raise StopIteration
-        self.future = asyncio.ensure_future(self.anext(), loop=self.loop)
+        self.future = asyncio.ensure_future(self.anext())
         return result
 
 
