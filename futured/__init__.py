@@ -84,7 +84,9 @@ class futured(partial):
     def stream(cls, fs: MutableSet, **kwargs) -> Iterator:
         """Generate futures as completed from a mutable set.
 
-        Iteration will consume futures from the set, and it can be updated while in use.
+        Args:
+            fs: set of futures which can be updated while in use
+            kwargs: `wait` options, e.g., timeout
         """
         while fs:
             done, pending = cls.wait(fs, return_when='FIRST_COMPLETED', **kwargs)
@@ -96,11 +98,13 @@ class futured(partial):
     def streamzip(self, queue: Sequence, **kwargs) -> Iterator:
         """Generate arg, future pairs as completed from mapping function.
 
-        The queue can be extended while in use.
+        Args:
+            queue: sequence of args which can be extended while in use
+            kwargs: `wait` options, e.g., timeout
         """
         pool, start = {}, 0  # type: ignore
         while pool or queue[start:]:
-            pool.update({self.task(arg, **kwargs): arg for arg in queue[start:]})
+            pool.update({self.task(arg): arg for arg in queue[start:]})
             start = len(queue)
             done, _ = type(self).wait(pool, return_when='FIRST_COMPLETED', **kwargs)
             for future in done:
@@ -178,8 +182,8 @@ class asynced(futured):
     def wait(cls, fs: Iterable, **kwargs) -> tuple:
         return cls.run(asyncio.wait, map(asyncio.ensure_future, fs), **kwargs)
 
-    def task(self, arg, **kwargs):
-        return asyncio.ensure_future(self(arg), **kwargs)
+    def task(self, arg):
+        return asyncio.ensure_future(self(arg))
 
 
 class looped:

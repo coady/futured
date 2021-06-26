@@ -8,7 +8,7 @@
 [![image](https://img.shields.io/badge/code%20style-black-000000.svg)](https://pypi.org/project/black/)
 [![image](http://mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
-Futured provides a simple consistent interface for concurrent functional programming in Python. It wraps any callable to return a `concurrent.futures.Future`, wraps any async coroutine to return an `asyncio.Future`, and provides concurrent iterators and context managers for futures.
+Futured provides a consistent interface for concurrent functional programming in Python. It wraps any callable to return a `concurrent.futures.Future`, wraps any async coroutine to return an `asyncio.Future`, and provides concurrent iterators and context managers for futures.
 
 ## Usage
 ### threaded, processed
@@ -30,8 +30,7 @@ fetch.map(urls, timeout=...)  # generate results as completed
 fetch.mapzip(urls)  # generate (url, result) pairs as completed
 ```
 
-Thread and process pool executors may be used as context managers,
-customized with options, and reused with different callables.
+Thread and process pool executors may be used as context managers, customized with options, and reused with different callables.
 
 ```python
 threaded(max_workers=...)(func, ...)
@@ -136,25 +135,31 @@ for value in forked(values, max_workers=...):
 
 ## Changes
 dev
+
 * Python >=3.7 required
 
 1.2
+
 * Python >=3.6 required
 
 1.1
+
 * Stream completed futures from a pending pool
 
 1.0
+
 * Executed functions are context managers
 * `starmap` supported
 
 0.3
+
 * `forked` has optional maximum number of workers
 * `waiting` context manager
 * `command` pipes (`|`)
 * `distributed.Client` support
 
 0.2
+
 * `command.coroutine` creates asyncio subprocesses
 * `futured.mapzip` generates results zipped with arguments
 * `asynced.run` supports asynchronous iterators
