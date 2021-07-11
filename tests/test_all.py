@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import os
 import subprocess
+import sys
 import time
 from concurrent import futures
 import pytest
@@ -94,7 +95,8 @@ def test_command():
     assert len(line.split()) == 3
     with pytest.raises(subprocess.CalledProcessError):
         asynced.run(command.coroutine, 'sleep')
-    assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''
+    if sys.version_info >= (3, 8):  # 3.7 requires current event loop
+        assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''
     assert asynced.run(command.coroutine, 'sleep 0', shell=True) == b''
     with pytest.raises(TypeError):
         list(sleep.mapzip('0'))
@@ -140,10 +142,9 @@ def test_context():
 @parametrized
 def test_tasks(coro=[threaded(**workers)(sleep), asleep]):
     tasks = coro.tasks(map(coro, delays[1:]))
-    it = iter(tasks)
-    assert next(it).result() == delays[-1]
+    assert next(tasks).result() == delays[-1]
     tasks.add(coro(delays[0]))
-    assert list(it)[-1].result() == delays[0]
+    assert list(tasks)[-1].result() == delays[0]
 
 
 def test_distributed():

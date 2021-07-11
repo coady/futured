@@ -87,14 +87,21 @@ class futured(partial):
             super().__init__(fs)
             self.timeout = timeout
             self.options = dict(return_when='FIRST_COMPLETED', timeout=timeout)
+            self.it = self.iter()
+
+        def iter(self):
+            while self:
+                done, _ = self.wait(list(super().__iter__()), **self.options)
+                if not done:
+                    raise self.TimeoutError
+                self -= done
+                yield from done
 
         def __iter__(self):
-            while self:
-                done, pending = self.wait(list(super().__iter__()), **self.options)
-                if not done:
-                    raise self.TimeoutError()
-                super().__init__(pending)
-                yield from done
+            return self
+
+        def __next__(self):
+            return next(self.it)
 
 
 class executed(futured):
