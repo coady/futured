@@ -137,6 +137,8 @@ for value in forked(values, max_workers=...):
 dev
 
 * Python >=3.7 required
+* Python 3.10 event loop changes
+* Streams replaced with tasks
 
 1.2
 

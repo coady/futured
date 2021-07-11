@@ -8,7 +8,7 @@ import subprocess
 import types
 from concurrent import futures
 from functools import partial
-from typing import AnyStr, AsyncIterable, Callable, Iterable, Iterator, MutableSet, Sequence
+from typing import AnyStr, AsyncIterable, Callable, Iterable, Iterator
 
 __version__ = '1.2'
 
@@ -17,7 +17,6 @@ class futured(partial):
     """A partial function which returns futures."""
 
     as_completed: Callable = NotImplemented
-    wait: Callable = NotImplemented
 
     def __get__(self, instance, owner):
         return self if instance is None else types.MethodType(self, instance)
@@ -30,20 +29,18 @@ class futured(partial):
             fs: iterable of futures
             as_completed, kwargs: generate results as completed with options, e.g., timeout
         """
-        fs = list(fs)  # ensure futures are executing
-        if as_completed or kwargs:
-            fs = cls.as_completed(fs, **kwargs)
-        return map(operator.methodcaller('result'), fs)
+        tasks = cls.as_completed(fs, **kwargs) if (as_completed or kwargs) else list(fs)
+        return map(operator.methodcaller('result'), tasks)
 
     @classmethod
-    def items(cls, iterable: Iterable, **kwargs) -> Iterator:
+    def items(cls, pairs: Iterable, **kwargs) -> Iterator:
         """Generate key, result pairs as completed from futures.
 
         Args:
-            iterable: key, future pairs
+            pairs: key, future pairs
             kwargs: as completed options, e.g., timeout
         """
-        keys = dict(map(reversed, iterable))  # type: ignore
+        keys = dict(map(reversed, pairs))  # type: ignore
         return ((keys[future], future.result()) for future in cls.as_completed(keys, **kwargs))
 
     def map(self, *iterables: Iterable, **kwargs) -> Iterator:
@@ -80,42 +77,30 @@ class futured(partial):
         finally:
             fs[:] = cls.results(fs, **kwargs)
 
-    @classmethod
-    def stream(cls, fs: MutableSet, **kwargs) -> Iterator:
-        """Generate futures as completed from a mutable set.
+    class tasks(set):
+        """A set of futures which iterate as completed, and can be updated while iterating."""
 
-        Args:
-            fs: set of futures which can be updated while in use
-            kwargs: `wait` options, e.g., timeout
-        """
-        while fs:
-            done, pending = cls.wait(fs, return_when='FIRST_COMPLETED', **kwargs)
-            fs.__init__(pending)  # type: ignore
-            yield from done
+        wait = staticmethod(futures.wait)
+        TimeoutError = futures.TimeoutError
 
-    task = partial.__call__
+        def __init__(self, fs: Iterable, *, timeout=None):
+            super().__init__(fs)
+            self.timeout = timeout
+            self.options = dict(return_when='FIRST_COMPLETED', timeout=timeout)
 
-    def streamzip(self, queue: Sequence, **kwargs) -> Iterator:
-        """Generate arg, future pairs as completed from mapping function.
-
-        Args:
-            queue: sequence of args which can be extended while in use
-            kwargs: `wait` options, e.g., timeout
-        """
-        pool, start = {}, 0  # type: ignore
-        while pool or queue[start:]:
-            pool.update({self.task(arg): arg for arg in queue[start:]})
-            start = len(queue)
-            done, _ = type(self).wait(pool, return_when='FIRST_COMPLETED', **kwargs)
-            for future in done:
-                yield pool.pop(future), future
+        def __iter__(self):
+            while self:
+                done, pending = self.wait(list(super().__iter__()), **self.options)
+                if not done:
+                    raise self.TimeoutError()
+                super().__init__(pending)
+                yield from done
 
 
 class executed(futured):
     """Extensible base class for callables which require a ``submit`` method."""
 
     as_completed = futures.as_completed
-    wait = futures.wait
     Executor = futures.Executor
 
     def __new__(cls, *args, **kwargs):
@@ -147,7 +132,7 @@ with contextlib.suppress(ImportError):
     class distributed(executed):
         """A partial function executed by a dask distributed client."""
 
-        from distributed import as_completed, wait, Client as Executor  # type: ignore
+        from distributed import as_completed, Client as Executor  # type: ignore
 
 
 class asynced(futured):
@@ -158,57 +143,55 @@ class asynced(futured):
 
     @classmethod
     def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
-        fs = list(map(asyncio.ensure_future, fs))
         if as_completed or kwargs:
-            fs = asyncio.as_completed(fs, **kwargs)
-        return map(asyncio.get_event_loop().run_until_complete, fs)
+            return map(operator.methodcaller('result'), cls.tasks(fs, **kwargs))
+        loop = asyncio.new_event_loop()
+        tasks = list(map(loop.create_task, fs))
+        return map(loop.run_until_complete, tasks)
 
     @staticmethod
     async def pair(key, future):
         return key, await future
 
     @classmethod
-    def items(cls, iterable: Iterable, **kwargs) -> Iterator:
-        return cls.results(itertools.starmap(cls.pair, iterable), as_completed=True, **kwargs)
+    def items(cls, pairs: Iterable, **kwargs) -> Iterator:
+        return cls.results(itertools.starmap(cls.pair, pairs), as_completed=True, **kwargs)
 
     def run(self: Callable, *args, **kwargs):
         """Synchronously call and run coroutine or asynchronous iterator."""
         coro = self(*args, **kwargs)
-        if isinstance(coro, AsyncIterable):
-            return looped(coro)
-        return asyncio.get_event_loop().run_until_complete(coro)
+        return asynced.iter(coro) if isinstance(coro, AsyncIterable) else asyncio.run(coro)
 
-    @classmethod
-    def wait(cls, fs: Iterable, **kwargs) -> tuple:
-        return cls.run(asyncio.wait, map(asyncio.ensure_future, fs), **kwargs)
+    @staticmethod
+    def iter(aiterable: AsyncIterable, loop=None):
+        """Wrap an asynchronous iterable into an iterator.
 
-    def task(self, arg):
-        return asyncio.ensure_future(self(arg))
+        Analogous to `asyncio.run` for coroutines.
+        """
+        loop = loop or asyncio.new_event_loop()
+        anext = aiterable.__aiter__().__anext__
+        task = loop.create_task(anext())
+        while True:
+            try:
+                result = loop.run_until_complete(task)
+            except StopAsyncIteration:
+                return
+            task = loop.create_task(anext())
+            yield result
 
+    class tasks(futured.tasks):
+        __doc__ = futured.tasks.__doc__
+        TimeoutError = asyncio.TimeoutError  # type: ignore
 
-class looped:
-    """Wrap an asynchronous iterable into an iterator.
+        def __init__(self, coros: Iterable, **kwargs):
+            self.loop = asyncio.new_event_loop()
+            super().__init__(map(self.loop.create_task, coros), **kwargs)
 
-    Analogous to loop.run_until_complete for coroutines.
-    """
+        def add(self, coro):
+            super().add(self.loop.create_task(coro))
 
-    def __init__(self, aiterable: AsyncIterable):
-        self.anext = aiterable.__aiter__().__anext__
-        self.future = asyncio.ensure_future(self.anext())
-
-    def __del__(self):  # suppress warning
-        self.future.cancel()  # pragma: no cover
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        try:
-            result = asyncio.get_event_loop().run_until_complete(self.future)
-        except StopAsyncIteration:
-            raise StopIteration
-        self.future = asyncio.ensure_future(self.anext())
-        return result
+        def wait(self, *args, **kwargs):
+            return self.loop.run_until_complete(asyncio.wait(*args, **kwargs))
 
 
 class command(subprocess.Popen):

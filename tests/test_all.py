@@ -119,7 +119,10 @@ def test_forked():
 
 def test_iteration():
     with timed():
-        for x, y in zip(asynced.run(sleeps), asynced.run(sleeps)):
+        assert list(asynced.run(sleeps))
+    loop = asyncio.new_event_loop()
+    with timed():
+        for x, y in zip(asynced.iter(sleeps(), loop=loop), asynced.iter(sleeps(), loop=loop)):
             assert x == y
 
 
@@ -129,25 +132,18 @@ def test_context():
         tasks.append(sleep(0))
         assert all(isinstance(task, futures.Future) for task in tasks)
     assert tasks == [None, None]
-    with asynced.waiting(asyncio.sleep(0, result='first'), loop=None) as tasks:
+    with asynced.waiting(asyncio.sleep(0, result='first')) as tasks:
         tasks.append(asyncio.sleep(0, result='second'))
     assert tasks == ['first', 'second']
 
 
 @parametrized
-def test_stream(coro=[threaded(**workers)(sleep), asleep]):
-    fs = set(map(coro, delays[1:]))
-    tasks = coro.stream(fs)
-    assert next(tasks).result() == delays[-1]
-    fs.add(coro(delays[0]))
-    assert list(tasks)[-1].result() == delays[0]
-    queue = delays[1:]
-    items = coro.streamzip(queue)
-    delay, future = next(items)
-    assert delay == future.result() == delays[-1]
-    queue.append(delays[0])
-    item, (delay, future) = items
-    assert delay == future.result() == delays[0]
+def test_tasks(coro=[threaded(**workers)(sleep), asleep]):
+    tasks = coro.tasks(map(coro, delays[1:]))
+    it = iter(tasks)
+    assert next(it).result() == delays[-1]
+    tasks.add(coro(delays[0]))
+    assert list(it)[-1].result() == delays[0]
 
 
 def test_distributed():

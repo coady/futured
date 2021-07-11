@@ -12,8 +12,6 @@
 
 ::: futured.asynced
 
-::: futured.looped
-
 ::: futured.command
 
 ::: futured.forked
