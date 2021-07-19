@@ -19,7 +19,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - run: pip install pytest-cov pytest-parametrized
     - run: make check
-    - uses: codecov/codecov-action@v2.0.1
+    - uses: codecov/codecov-action@v2
+      with:
+        root_dir: .
 
   lint:
     runs-on: ubuntu-latest
