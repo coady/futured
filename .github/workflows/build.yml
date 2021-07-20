@@ -21,7 +21,7 @@ jobs:
     - run: make check
     - uses: codecov/codecov-action@v2
       with:
-        root_dir: .
+        files: .coverage
 
   lint:
     runs-on: ubuntu-latest
