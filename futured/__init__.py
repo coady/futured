@@ -85,7 +85,6 @@ class futured(partial):
 
         def __init__(self, fs: Iterable, *, timeout=None):
             super().__init__(fs)
-            self.timeout = timeout
             self.options = dict(return_when='FIRST_COMPLETED', timeout=timeout)
             self.it = self.iter()
 
