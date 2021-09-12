@@ -141,7 +141,7 @@ for value in forked(values, max_workers=...):
 ```
 
 ## Changes
-dev
+1.3
 
 * Python >=3.7 required
 * Python 3.10 event loop changes
