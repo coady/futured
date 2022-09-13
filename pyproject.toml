@@ -1,7 +1,49 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "futured"
+dynamic = ["version"]
+description = "Functional interface for concurrent futures, including asynchronous I/O."
+readme = "README.md"
+requires-python = ">=3.7"
+license = {file = "LICENSE.txt"}
+authors = [{name = "Aric Coady", email = "aric.coady@gmail.com"}]
+keywords = ["concurrent", "futures", "threads", "processes", "async", "asyncio"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+    
+[project.urls]
+Homepage = "https://github.com/coady/futured"
+Documentation = "https://coady.github.io/futured"
+
+[tool.setuptools]
+packages = ["futured"]
+
+[tool.setuptools.dynamic]
+version = {attr = "futured.__version__"}
+
+[tool.setuptools.package-data]
+futured = ["py.typed"]
 
 [tool.black]
 line-length = 100
 skip-string-normalization = true
+
+[tool.coverage.run]
+source = ["futured"]
+branch = true
