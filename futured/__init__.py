@@ -8,7 +8,7 @@ import subprocess
 import types
 from concurrent import futures
 from functools import partial
-from typing import AnyStr, AsyncIterable, Callable, Iterable, Iterator
+from typing import AnyStr, AsyncIterable, Callable, Iterable, Iterator, Optional
 
 __version__ = '1.3'
 
@@ -27,7 +27,7 @@ class futured(partial):
 
         Args:
             fs: iterable of futures
-            as_completed, kwargs: generate results as completed with options, e.g., timeout
+            as_completed kwargs: generate results as completed with options, e.g., timeout
         """
         tasks = cls.as_completed(fs, **kwargs) if (as_completed or kwargs) else list(fs)
         return map(operator.methodcaller('result'), tasks)
@@ -38,7 +38,7 @@ class futured(partial):
 
         Args:
             pairs: key, future pairs
-            kwargs: as completed options, e.g., timeout
+            **kwargs: as completed options, e.g., timeout
         """
         keys = dict(map(reversed, pairs))  # type: ignore
         return ((keys[future], future.result()) for future in cls.as_completed(keys, **kwargs))
@@ -47,7 +47,7 @@ class futured(partial):
         """Asynchronously map function.
 
         Args:
-            kwargs: keyword options for [results][futured.futured.results]
+            **kwargs: keyword options for [results][futured.futured.results]
         """
         return self.results(map(self, *iterables), **kwargs)
 
@@ -55,7 +55,7 @@ class futured(partial):
         """Asynchronously starmap function.
 
         Args:
-            kwargs: keyword options for [results][futured.futured.results]
+            **kwargs: keyword options for [results][futured.futured.results]
         """
         return self.results(itertools.starmap(self, iterable), **kwargs)
 
@@ -63,7 +63,7 @@ class futured(partial):
         """Generate arg, result pairs as completed.
 
         Args:
-            kwargs: keyword options for [items][futured.futured.items]
+            **kwargs: keyword options for [items][futured.futured.items]
         """
         return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
 
@@ -247,7 +247,7 @@ class Results(queue.Queue):
         return not status
 
 
-def forked(values: Iterable, max_workers: int = None) -> Iterator:
+def forked(values: Iterable, max_workers: Optional[int] = None) -> Iterator:
     """Generate each value in its own child process and wait in the parent."""
     max_workers = max_workers or os.cpu_count() or 1  # same default as ProcessPoolExecutor
     workers, results = 0, Results()
