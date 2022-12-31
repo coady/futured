@@ -104,7 +104,7 @@ class futured(partial):
 
 
 class executed(futured):
-    """Extensible base class for callables which require a ``submit`` method."""
+    """Extensible base class for callables which require a `submit` method."""
 
     as_completed = futures.as_completed
     Executor = futures.Executor

@@ -2,7 +2,6 @@ import asyncio
 import contextlib
 import os
 import subprocess
-import sys
 import time
 from concurrent import futures
 import pytest
@@ -95,8 +94,7 @@ def test_command():
     assert len(line.split()) == 3
     with pytest.raises(subprocess.CalledProcessError):
         asynced.run(command.coroutine, 'sleep')
-    if sys.version_info >= (3, 8):  # 3.7 requires current event loop
-        assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''
+    assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''
     assert asynced.run(command.coroutine, 'sleep 0', shell=True) == b''
     with pytest.raises(TypeError):
         list(sleep.mapzip('0'))
