@@ -1,11 +1,11 @@
 ::: futured.futured
 
 ::: futured.threaded
-    selection:
+    options:
         members: false
 
 ::: futured.processed
-    selection:
+    options:
         members: false
 
 ::: futured.decorated

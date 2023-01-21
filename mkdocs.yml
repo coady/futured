@@ -20,4 +20,4 @@ plugins:
           options:
             show_root_heading: true
   - mkdocs-jupyter:
-      execute: True
+      execute: true
