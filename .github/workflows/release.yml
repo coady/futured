@@ -8,6 +8,8 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v4
@@ -17,6 +19,3 @@ jobs:
     - run: python -m build -n
     - run: PYTHONPATH=$PWD mkdocs gh-deploy --force
     - uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_TOKEN }}
-        verbose: true
