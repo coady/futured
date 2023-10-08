@@ -6,7 +6,7 @@
 [![image](https://codecov.io/gh/coady/futured/branch/main/graph/badge.svg)](https://codecov.io/github/coady/futured)
 [![image](https://github.com/coady/futured/workflows/codeql/badge.svg)](https://github.com/coady/futured/security/code-scanning)
 [![image](https://img.shields.io/badge/code%20style-black-000000.svg)](https://pypi.org/project/black/)
-[![image](http://mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
+[![image](https://mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
 Futured provides a consistent interface for concurrent functional programming in Python. It wraps any callable to return a `concurrent.futures.Future`, wraps any async coroutine to return an `asyncio.Future`, and provides concurrent iterators and context managers for futures.
 
@@ -139,40 +139,3 @@ for value in forked(values, max_workers=...):
 ```console
 % pytest [--cov]
 ```
-
-## Changes
-1.4
-
-* Python >=3.8 required
-
-1.3
-
-* Python >=3.7 required
-* Python 3.10 event loop changes
-* Streams replaced with tasks
-
-1.2
-
-* Python >=3.6 required
-
-1.1
-
-* Stream completed futures from a pending pool
-
-1.0
-
-* Executed functions are context managers
-* `starmap` supported
-
-0.3
-
-* `forked` has optional maximum number of workers
-* `waiting` context manager
-* `command` pipes (`|`)
-* `distributed.Client` support
-
-0.2
-
-* `command.coroutine` creates asyncio subprocesses
-* `futured.mapzip` generates results zipped with arguments
-* `asynced.run` supports asynchronous iterators
