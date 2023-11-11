@@ -1,5 +1,5 @@
 check:
-	pytest -s --cov
+	python -m pytest -s --cov
 
 lint:
 	black --check .

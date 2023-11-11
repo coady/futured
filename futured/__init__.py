@@ -5,9 +5,10 @@ import operator
 import os
 import subprocess
 import types
+from collections.abc import AsyncIterable, Callable, Iterable, Iterator
 from concurrent import futures
 from functools import partial
-from typing import AnyStr, AsyncIterable, Callable, Iterable, Iterator, Optional
+from typing import Union
 
 __version__ = '1.4'
 
@@ -217,7 +218,7 @@ class command(subprocess.Popen):
         self = await create(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
         return cls.check(self, args, *(await self.communicate()))
 
-    def result(self, **kwargs) -> AnyStr:
+    def result(self, **kwargs) -> Union[str, bytes]:
         """Return stdout or raise stderr."""
         return self.check(self.args, *self.communicate(**kwargs))
 
@@ -234,7 +235,7 @@ class command(subprocess.Popen):
         return iter(self.result().splitlines())
 
 
-def forked(values: Iterable, max_workers: Optional[int] = None) -> Iterator:
+def forked(values: Iterable, max_workers: int = 0) -> Iterator:
     """Generate each value in its own child process and wait in the parent."""
     max_workers = max_workers or os.cpu_count() or 1  # same default as ProcessPoolExecutor
     workers: dict = {}
