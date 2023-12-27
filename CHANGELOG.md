@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## Unreleased
 ### Changed
 * Python >=3.9 required
+* `gevent` greenlet support
 
 ## [1.4](https://pypi.org/project/futured/1.4/) - 2023-05-06
 ### Changed

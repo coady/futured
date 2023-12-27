@@ -8,9 +8,9 @@
     options:
         members: false
 
-::: futured.decorated
-
 ::: futured.asynced
+
+::: futured.decorated
 
 ::: futured.command
 

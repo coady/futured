@@ -78,6 +78,13 @@ with asynced.waiting(*fs) as tasks:  # concurrent coroutines completed in a bloc
 asynced.tasks(fs, timeout=...)  # mutable set of running tasks which iterate as completed
 ```
 
+### extensions
+There is also support for [dask distributed](https://distributed.dask.org/) clients and [gevent](http://www.gevent.org/) greenlets.
+
+```python
+from futured import distributed, greened
+```
+
 ### decorators
 Naturally `futured` wrappers can be used as decorators, but arguments can also be partially bound.
 

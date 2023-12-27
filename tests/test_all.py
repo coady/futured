@@ -154,3 +154,16 @@ def test_distributed():
         assert list(dsleep.map(delays)) == list(results) == [None] * len(delays)
     with pytest.raises(Exception):
         dsleep(0)
+
+
+def test_gevent():
+    gevent = pytest.importorskip('gevent')
+    from futured import greened
+
+    sleep = greened(gevent.sleep)
+    assert list(sleep.map(delays)) == [None] * len(delays)
+    assert next(sleep.map(delays, as_completed=True)) is None
+    sleep = greened(size=len(delays))(gevent.sleep)
+    results = dict(sleep.mapzip(delays))
+    assert results == dict.fromkeys(delays)
+    assert list(results) == sorted(delays)
