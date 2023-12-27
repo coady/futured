@@ -80,20 +80,22 @@ class futured(partial):
     class tasks(set):
         """A set of futures which iterate as completed, and can be updated while iterating."""
 
-        wait = staticmethod(futures.wait)
         TimeoutError = futures.TimeoutError
 
         def __init__(self, fs: Iterable, *, timeout=None):
             super().__init__(fs)
-            self.options = dict(return_when='FIRST_COMPLETED', timeout=timeout)
+            self.timeout = timeout
             self.it = self.iter()
+
+        def wait(self, fs: list) -> Iterable:
+            return futures.wait(fs, self.timeout, return_when='FIRST_COMPLETED').done
 
         def iter(self):
             while self:
-                done, _ = self.wait(list(super().__iter__()), **self.options)
+                done = self.wait(list(super().__iter__()))
                 if not done:
                     raise self.TimeoutError
-                self -= done
+                self.difference_update(done)
                 yield from done
 
         def __iter__(self):
@@ -142,10 +144,7 @@ with contextlib.suppress(ImportError):
 
 
 class asynced(futured):
-    """A partial coroutine.
-
-    Anywhere futures are expected, coroutines are also supported.
-    """
+    """A partial async coroutine."""
 
     @classmethod
     def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
@@ -196,8 +195,38 @@ class asynced(futured):
         def add(self, coro):
             super().add(self.loop.create_task(coro))
 
-        def wait(self, *args, **kwargs):
-            return self.loop.run_until_complete(asyncio.wait(*args, **kwargs))
+        def wait(self, fs: list) -> Iterable:
+            coro = asyncio.wait(fs, timeout=self.timeout, return_when='FIRST_COMPLETED')
+            return self.loop.run_until_complete(coro)[0]
+
+
+with contextlib.suppress(ImportError):
+    import gevent.pool  # type: ignore
+
+    class greened(futured):
+        """A partial gevent greenlet."""
+
+        def __new__(cls, *args, **kwargs):
+            if args:
+                return futured.__new__(cls, gevent.spawn, *args, **kwargs)
+            return partial(futured.__new__, cls, gevent.pool.Pool(**kwargs).spawn)
+
+        @classmethod
+        def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
+            tasks = cls.tasks(fs, **kwargs) if (as_completed or kwargs) else list(fs)
+            return map(operator.methodcaller('get'), tasks)
+
+        @classmethod
+        def items(cls, pairs: Iterable, **kwargs) -> Iterator:
+            keys = dict(map(reversed, pairs))  # type: ignore
+            return ((keys[future], future.get()) for future in cls.tasks(keys, **kwargs))
+
+        class tasks(futured.tasks):
+            __doc__ = futured.tasks.__doc__
+            TimeoutError = gevent.Timeout
+
+            def wait(self, fs: list) -> Iterable:
+                return gevent.wait(fs, self.timeout, count=1)
 
 
 class command(subprocess.Popen):
