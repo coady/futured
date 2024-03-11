@@ -49,9 +49,6 @@ extend-include = ["*.ipynb"]
 [tool.ruff.format]
 quote-style = "single"
 
-[tool.ruff.lint.per-file-ignores]
-"*.ipynb" = ["E402"]
-
 [tool.coverage.run]
 source = ["futured"]
 branch = true

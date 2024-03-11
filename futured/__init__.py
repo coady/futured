@@ -279,8 +279,7 @@ def forked(values: Iterable, max_workers: int = 0) -> Iterator:
     for value in values:
         while len(workers) >= max_workers:
             wait()
-        pid = os.fork()
-        if pid:
+        if pid := os.fork():
             workers[pid] = value
         else:  # pragma: no cover
             yield value
