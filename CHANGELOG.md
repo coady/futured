@@ -4,8 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
+
+## [1.5](https://pypi.org/project/futured/1.5/) - 2024-06-02
 ### Changed
 * Python >=3.9 required
+
+### Added
 * `gevent` greenlet support
 
 ## [1.4](https://pypi.org/project/futured/1.4/) - 2023-05-06
