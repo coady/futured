@@ -1,11 +1,7 @@
-[build-system]
-requires = ["setuptools>=61", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "futured"
-dynamic = ["version"]
-description = "Functional interface for concurrent futures, including asynchronous I/O."
+version = "1.4"
+description = "Functional interface for concurrent futures, including async coroutines."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE.txt"}
@@ -32,15 +28,6 @@ Homepage = "https://github.com/coady/futured"
 Documentation = "https://coady.github.io/futured"
 Changelog = "https://github.com/coady/futured/blob/main/CHANGELOG.md"
 Issues = "https://github.com/coady/futured/issues"
-
-[tool.setuptools]
-packages = ["futured"]
-
-[tool.setuptools.dynamic]
-version = {attr = "futured.__version__"}
-
-[tool.setuptools.package-data]
-futured = ["py.typed"]
 
 [tool.ruff]
 line-length = 100

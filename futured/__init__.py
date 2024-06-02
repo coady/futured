@@ -10,8 +10,6 @@ from concurrent import futures
 from functools import partial
 from typing import Union
 
-__version__ = '1.4'
-
 
 class futured(partial):
     """A partial function which returns futures."""

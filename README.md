@@ -8,7 +8,7 @@
 [![image](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![image](https://mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
-Futured provides a consistent interface for concurrent functional programming in Python. It wraps any callable to return a `concurrent.futures.Future`, wraps any async coroutine to return an `asyncio.Future`, and provides concurrent iterators and context managers for futures.
+Futured provides a consistent interface for concurrent functional programming in Python. It wraps any callable to return a `concurrent.futures.Future`, wraps any async coroutine with a compatible `Task` interface, and provides concurrent iterators and context managers for futures.
 
 ## Usage
 ### threaded, processed
