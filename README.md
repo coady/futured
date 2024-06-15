@@ -2,9 +2,9 @@
 ![image](https://img.shields.io/pypi/pyversions/futured.svg)
 [![image](https://pepy.tech/badge/futured)](https://pepy.tech/project/futured)
 ![image](https://img.shields.io/pypi/status/futured.svg)
-[![image](https://github.com/coady/futured/workflows/build/badge.svg)](https://github.com/coady/futured/actions)
+[![build](https://github.com/coady/futured/actions/workflows/build.yml/badge.svg)](https://github.com/coady/futured/actions/workflows/build.yml)
 [![image](https://codecov.io/gh/coady/futured/branch/main/graph/badge.svg)](https://codecov.io/github/coady/futured)
-[![image](https://github.com/coady/futured/workflows/codeql/badge.svg)](https://github.com/coady/futured/security/code-scanning)
+[![CodeQL](https://github.com/coady/futured/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/coady/futured/actions/workflows/github-code-scanning/codeql)
 [![image](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![image](https://mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
