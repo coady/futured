@@ -184,7 +184,7 @@ class asynced(futured):
 
     class tasks(futured.tasks):
         __doc__ = futured.tasks.__doc__
-        TimeoutError = asyncio.TimeoutError  # type: ignore
+        TimeoutError = asyncio.TimeoutError
 
         def __init__(self, coros: Iterable, **kwargs):
             self.loop = asyncio.new_event_loop()
