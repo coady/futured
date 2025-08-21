@@ -6,7 +6,7 @@
 [![image](https://codecov.io/gh/coady/futured/branch/main/graph/badge.svg)](https://codecov.io/github/coady/futured)
 [![CodeQL](https://github.com/coady/futured/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/coady/futured/actions/workflows/github-code-scanning/codeql)
 [![image](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![image](https://mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
+[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
 
 Futured provides a consistent interface for concurrent functional programming in Python. It wraps any callable to return a `concurrent.futures.Future`, wraps any async coroutine with a compatible `Task` interface, and provides concurrent iterators and context managers for futures.
 
@@ -137,12 +137,12 @@ for value in forked(values, max_workers=...):
 
 ## Installation
 ```console
-% pip install futured
+pip install futured
 ```
 
 ## Tests
 100% branch coverage.
 
 ```console
-% pytest [--cov]
+pytest [--cov]
 ```

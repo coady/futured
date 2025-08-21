@@ -1,10 +1,10 @@
 check:
-	python -m pytest -s --cov
+	uv run pytest -s --cov
 
 lint:
-	ruff check .
-	ruff format --check .
-	mypy -p futured
+	uv run ruff check .
+	uv run ruff format --check .
+	uv run ty check futured
 
 html:
-	PYTHONPATH=$(PWD) python -m mkdocs build
+	uv run --with futured mkdocs build

@@ -14,7 +14,7 @@ from typing import Union
 class futured(partial):
     """A partial function which returns futures."""
 
-    as_completed: Callable = NotImplemented
+    as_completed: Callable = NotImplemented  # type: ignore
 
     def __get__(self, instance, owner):
         return self if instance is None else types.MethodType(self, instance)
@@ -38,7 +38,7 @@ class futured(partial):
             pairs: key, future pairs
             **kwargs: as completed options, e.g., timeout
         """
-        keys = dict(map(reversed, pairs))  # type: ignore
+        keys = dict(map(reversed, pairs))
         return ((keys[future], future.result()) for future in cls.as_completed(keys, **kwargs))
 
     def map(self, *iterables: Iterable, **kwargs) -> Iterator:
@@ -199,7 +199,7 @@ class asynced(futured):
 
 
 with contextlib.suppress(ImportError):
-    import gevent.pool  # type: ignore
+    import gevent.pool
 
     class greened(futured):
         """A partial gevent greenlet."""
@@ -216,7 +216,7 @@ with contextlib.suppress(ImportError):
 
         @classmethod
         def items(cls, pairs: Iterable, **kwargs) -> Iterator:
-            keys = dict(map(reversed, pairs))  # type: ignore
+            keys = dict(map(reversed, pairs))
             return ((keys[future], future.get()) for future in cls.tasks(keys, **kwargs))
 
         class tasks(futured.tasks):
@@ -242,7 +242,7 @@ class command(subprocess.Popen):
     async def coroutine(cls, *args, shell=False, **kwargs):
         """Create a subprocess coroutine, suitable for timeouts."""
         create = asyncio.create_subprocess_shell if shell else asyncio.create_subprocess_exec
-        self = await create(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+        self = await create(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)  # type: ignore
         return cls.check(self, args, *(await self.communicate()))
 
     def result(self, **kwargs) -> Union[str, bytes]:
