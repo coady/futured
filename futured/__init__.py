@@ -118,7 +118,7 @@ class executed(futured):
         return self
 
     def __exit__(self, *args):
-        self.func.__self__.__exit__(*args)
+        self.func.__self__.__exit__(*args)  # type: ignore
 
 
 class threaded(executed):

@@ -32,7 +32,7 @@ Issues = "https://github.com/coady/futured/issues"
 line-length = 100
 
 [tool.ruff.format]
-quote-style = "single"
+quote-style = "preserve"
 
 [tool.coverage.run]
 source = ["futured"]
@@ -42,7 +42,7 @@ branch = true
 dev = [
     "pytest-cov",
     "pytest-parametrized",
-    "gevent; python_version < '3.14'",
+    "gevent",
     "ruff",
     "ty",
     "mkdocstrings[python]",
