@@ -8,7 +8,6 @@ import types
 from collections.abc import AsyncIterable, Callable, Iterable, Iterator
 from concurrent import futures
 from functools import partial
-from typing import Union
 
 
 class futured(partial):
@@ -245,7 +244,7 @@ class command(subprocess.Popen):
         self = await create(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)  # type: ignore
         return cls.check(self, args, *(await self.communicate()))
 
-    def result(self, **kwargs) -> Union[str, bytes]:
+    def result(self, **kwargs) -> str | bytes:
         """Return stdout or raise stderr."""
         return self.check(self.args, *self.communicate(**kwargs))
 
