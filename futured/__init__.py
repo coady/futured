@@ -172,13 +172,13 @@ class asynced(futured):
         """
         loop = loop or asyncio.new_event_loop()
         anext = aiterable.__aiter__().__anext__
-        task = loop.create_task(anext())
+        task = loop.create_task(anext())  # type: ignore
         while True:
             try:
                 result = loop.run_until_complete(task)
             except StopAsyncIteration:
                 return
-            task = loop.create_task(anext())
+            task = loop.create_task(anext())  # type: ignore
             yield result
 
     class tasks(futured.tasks):
@@ -189,7 +189,7 @@ class asynced(futured):
             self.loop = asyncio.new_event_loop()
             super().__init__(map(self.loop.create_task, coros), **kwargs)
 
-        def add(self, coro):
+        def add(self, coro):  # type: ignore
             super().add(self.loop.create_task(coro))
 
         def wait(self, fs: list) -> Iterable:
@@ -242,7 +242,7 @@ class command(subprocess.Popen):
         """Create a subprocess coroutine, suitable for timeouts."""
         create = asyncio.create_subprocess_shell if shell else asyncio.create_subprocess_exec
         self = await create(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)  # type: ignore
-        return cls.check(self, args, *(await self.communicate()))
+        return cls.check(self, args, *(await self.communicate()))  # type: ignore
 
     def result(self, **kwargs) -> str | bytes:
         """Return stdout or raise stderr."""
