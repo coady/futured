@@ -137,7 +137,7 @@ with contextlib.suppress(ImportError):
     class distributed(executed):
         """A partial function executed by a dask distributed client."""
 
-        from distributed import as_completed, Client as Executor  # type: ignore
+        from distributed import as_completed, Client as Executor
 
 
 class asynced(futured):

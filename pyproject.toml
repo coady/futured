@@ -36,6 +36,7 @@ quote-style = "preserve"
 
 [tool.ty.rules]
 unused-ignore-comment = "error"
+unresolved-import = "ignore"
 
 [tool.coverage.run]
 source = ["futured"]
