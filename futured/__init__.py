@@ -8,6 +8,7 @@ import types
 from collections.abc import AsyncIterable, Callable, Iterable, Iterator
 from concurrent import futures
 from functools import partial
+from typing import Self
 
 
 class futured(partial):
@@ -248,11 +249,11 @@ class command(subprocess.Popen):
         """Return stdout or raise stderr."""
         return self.check(self.args, *self.communicate(**kwargs))
 
-    def pipe(self, *args, **kwargs) -> 'command':
+    def pipe(self, *args, **kwargs) -> Self:
         """Pipe stdout to the next command's stdin."""
         return type(self)(*args, stdin=self.stdout, **kwargs)
 
-    def __or__(self, other: Iterable) -> 'command':
+    def __or__(self, other: Iterable) -> Self:
         """Alias of [pipe][futured.command.pipe]."""
         return self.pipe(*other)
 
