@@ -28,7 +28,7 @@ class futured(partial):
             as_completed kwargs: generate results as completed with options, e.g., timeout
         """
         tasks = cls.as_completed(fs, **kwargs) if (as_completed or kwargs) else list(fs)
-        return map(operator.methodcaller('result'), tasks)
+        return map(operator.methodcaller("result"), tasks)
 
     @classmethod
     def items(cls, pairs: Iterable, **kwargs) -> Iterator:
@@ -86,7 +86,7 @@ class futured(partial):
             self.it = self.iter()
 
         def wait(self, fs: list) -> Iterable:
-            return futures.wait(fs, self.timeout, return_when='FIRST_COMPLETED').done
+            return futures.wait(fs, self.timeout, return_when="FIRST_COMPLETED").done
 
         def iter(self):
             while self:
@@ -138,7 +138,7 @@ with contextlib.suppress(ImportError):
     class distributed(executed):
         """A partial function executed by a dask distributed client."""
 
-        from distributed import as_completed, Client as Executor
+        from distributed import Client as Executor, as_completed  # noqa
 
 
 class asynced(futured):
@@ -147,7 +147,7 @@ class asynced(futured):
     @classmethod
     def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
         if as_completed or kwargs:
-            return map(operator.methodcaller('result'), cls.tasks(fs, **kwargs))
+            return map(operator.methodcaller("result"), cls.tasks(fs, **kwargs))
         loop = asyncio.new_event_loop()
         tasks = list(map(loop.create_task, fs))
         return map(loop.run_until_complete, tasks)
@@ -194,7 +194,7 @@ class asynced(futured):
             super().add(self.loop.create_task(coro))
 
         def wait(self, fs: list) -> Iterable:
-            coro = asyncio.wait(fs, timeout=self.timeout, return_when='FIRST_COMPLETED')
+            coro = asyncio.wait(fs, timeout=self.timeout, return_when="FIRST_COMPLETED")
             return self.loop.run_until_complete(coro)[0]
 
 
@@ -212,7 +212,7 @@ with contextlib.suppress(ImportError):
         @classmethod
         def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
             tasks = cls.tasks(fs, **kwargs) if (as_completed or kwargs) else list(fs)
-            return map(operator.methodcaller('get'), tasks)
+            return map(operator.methodcaller("get"), tasks)
 
         @classmethod
         def items(cls, pairs: Iterable, **kwargs) -> Iterator:

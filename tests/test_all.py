@@ -4,12 +4,14 @@ import os
 import subprocess
 import time
 from concurrent import futures
+
 import pytest
 from parametrized import parametrized
-from futured import futured, threaded, processed, asynced, command, forked, decorated
+
+from futured import asynced, command, decorated, forked, futured, processed, threaded
 
 delays = [0.3, 0.25, 0.2]
-workers = {'max_workers': len(delays)}
+workers = {"max_workers": len(delays)}
 
 
 @contextlib.contextmanager
@@ -47,9 +49,9 @@ class sleeps:
 
 def test_class():
     fstr = decorated(str, lower=threaded)
-    assert fstr('Test').lower().result() == 'test'
-    (st,) = fstr.lower.map(['Test'])
-    assert st == 'test'
+    assert fstr("Test").lower().result() == "test"
+    (st,) = fstr.lower.map(["Test"])
+    assert st == "test"
 
 
 def test_results():
@@ -81,23 +83,23 @@ def test_map(coro=[threaded(**workers)(sleep), processed(**workers)(sleep), asle
 
 
 def test_command():
-    sleep = futured(command, 'sleep')
+    sleep = futured(command, "sleep")
     with timed():
-        assert list(sleep.map(map(str, delays))) == [b''] * len(delays)
+        assert list(sleep.map(map(str, delays))) == [b""] * len(delays)
     with pytest.raises(subprocess.CalledProcessError):
         sleep().result()
     with pytest.raises(subprocess.TimeoutExpired):
-        sleep('1').result(timeout=0)
-    count = int(command('ls').pipe('wc', '-l').result().strip())
-    assert count and count == len(list(command('ls')))
-    (line,) = command('ls') | ('wc',)
+        sleep("1").result(timeout=0)
+    count = int(command("ls").pipe("wc", "-l").result().strip())
+    assert count and count == len(list(command("ls")))
+    (line,) = command("ls") | ("wc",)
     assert len(line.split()) == 3
     with pytest.raises(subprocess.CalledProcessError):
-        asynced.run(command.coroutine, 'sleep')
-    assert next(asynced(command.coroutine, 'sleep').map('0', timeout=None)) == b''
-    assert asynced.run(command.coroutine, 'sleep 0', shell=True) == b''
+        asynced.run(command.coroutine, "sleep")
+    assert next(asynced(command.coroutine, "sleep").map("0", timeout=None)) == b""
+    assert asynced.run(command.coroutine, "sleep 0", shell=True) == b""
     with pytest.raises(TypeError):
-        list(sleep.mapzip('0'))
+        list(sleep.mapzip("0"))
 
 
 def test_forked():
@@ -132,9 +134,9 @@ def test_context():
         tasks.append(sleep(0))
         assert all(isinstance(task, futures.Future) for task in tasks)
     assert tasks == [None, None]
-    with asynced.waiting(asyncio.sleep(0, result='first')) as tasks:
-        tasks.append(asyncio.sleep(0, result='second'))
-    assert tasks == ['first', 'second']
+    with asynced.waiting(asyncio.sleep(0, result="first")) as tasks:
+        tasks.append(asyncio.sleep(0, result="second"))
+    assert tasks == ["first", "second"]
 
 
 @parametrized
@@ -146,7 +148,7 @@ def test_tasks(coro=[threaded(**workers)(sleep), asleep]):
 
 
 def test_distributed():
-    pytest.importorskip('distributed')
+    pytest.importorskip("distributed")
     from futured import distributed
 
     with distributed(time.sleep) as dsleep:
@@ -157,7 +159,7 @@ def test_distributed():
 
 
 def test_gevent():
-    gevent = pytest.importorskip('gevent')
+    gevent = pytest.importorskip("gevent")
     from futured import greened
 
     sleep = greened(gevent.sleep)
