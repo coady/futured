@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 * Python >=3.11 required
 * Tasks support `pop` instead of custom iteration
+* Context manager moved to tasks
 
 ## [1.5.1](https://pypi.org/project/futured/1.5.1/) - 2025-11-01
 ### Changed

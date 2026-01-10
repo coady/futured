@@ -130,13 +130,17 @@ def test_iteration():
 
 def test_context():
     sleep = threaded(time.sleep)
-    with sleep.waiting(sleep(0)) as tasks:
-        tasks.append(sleep(0))
+    with sleep.tasks([sleep(0)]) as tasks:
+        tasks.add(sleep(0))
         assert all(isinstance(task, futures.Future) for task in tasks)
-    assert tasks == [None, None]
-    with asynced.waiting(asyncio.sleep(0, result="first")) as tasks:
-        tasks.append(asyncio.sleep(0, result="second"))
-    assert tasks == ["first", "second"]
+    assert [task.done() for task in tasks] == [True, True]
+    with pytest.raises(futures.TimeoutError), sleep.tasks([sleep(1)], timeout=0):
+        ...
+    with asynced.tasks([asyncio.sleep(0, result="first")]) as tasks:
+        tasks.add(asyncio.sleep(0, result="second"))
+    assert [task.done() for task in tasks] == [True, True]
+    with pytest.raises(futures.TimeoutError), asynced.tasks([asyncio.sleep(1)], timeout=0):
+        ...
 
 
 @parametrized
@@ -172,5 +176,9 @@ def test_gevent():
     results = dict(sleep.mapzip(delays))
     assert results == dict.fromkeys(delays)
     assert list(results) == sorted(delays)
+    with pytest.raises(gevent.Timeout), greened.tasks([sleep(1)], timeout=0):
+        ...
     tasks = greened.tasks([sleep(1)])
     assert tasks.pop().get() is None
+    with tasks:
+        ...

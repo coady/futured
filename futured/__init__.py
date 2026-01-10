@@ -65,24 +65,24 @@ class futured(partial):
         """
         return self.items(((arg, self(arg)) for arg in iterable), **kwargs)
 
-    @classmethod
-    @contextlib.contextmanager
-    def waiting(cls, *fs, **kwargs):
-        """Return context manager which waits on [results][futured.futured.results]."""
-        fs = list(fs)
-        try:
-            yield fs
-        finally:
-            fs[:] = cls.results(fs, **kwargs)
-
     class tasks(set):
-        """A set of futures which tracks completion."""
+        """A set of futures which tracks completion.
+
+        The context manager waits for all tasks.
+        """
 
         as_completed: Callable = NotImplemented  # type: ignore
 
-        def __init__(self, fs: Iterable, *, timeout=None):
+        def __init__(self, fs: Iterable = (), *, timeout=None):
             super().__init__(fs)
             self.timeout = timeout
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            for _ in self.as_completed():
+                ...
 
         def pop(self):
             """Remove and return next completed task."""
@@ -191,7 +191,7 @@ class asynced(futured):
     class tasks(futured.tasks):
         __doc__ = futured.tasks.__doc__
 
-        def __init__(self, coros: Iterable, **kwargs):
+        def __init__(self, coros: Iterable = (), **kwargs):
             self.loop = asyncio.new_event_loop()
             super().__init__(map(self.loop.create_task, coros), **kwargs)
 
@@ -229,7 +229,12 @@ with contextlib.suppress(ImportError):
             __doc__ = futured.tasks.__doc__
 
             def as_completed(self):
-                return gevent.iwait(self, self.timeout)
+                count = 0
+                for task in gevent.iwait(self, self.timeout):
+                    count += 1
+                    yield task
+                if count < len(self):
+                    raise gevent.Timeout
 
 
 class command(subprocess.Popen):

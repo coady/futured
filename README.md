@@ -37,18 +37,11 @@ threaded(max_workers=...)(func, ...)
 processed(max_workers=...)(func, ...)
 ```
 
-`futured` classes have a `waiting` context manager which collects results from tasks. Futures can be registered at creation, or appended to the list of tasks.
-
-```python
-with threaded.waiting(*fs) as tasks:
-    tasks.append(future)
-tasks  # list of completed results
-```
-
 `futured` classes provide a `tasks` interface which generalizes `futures.as_completed` and `futures.wait`, while allowing the set of tasks to be modified, e.g., for retries.
 
 ```python
-threaded.tasks(fs, timeout=...)  # mutable set of running tasks which pop as completed
+tasks = threaded.tasks(fs, timeout=...)  # mutable set of running tasks which pop as completed
+with tasks:  # wait for all tasks on exit
 ```
 
 ### asynced
@@ -69,13 +62,13 @@ fetch.map(urls, timeout=...)  # generate results as completed
 fetch.mapzip(urls)  # generate (url, result) pairs as completed
 ```
 
-`asynced` provides utilities for calling coroutines from a synchronous context. `waiting` is similar to [trio's nursery](https://trio.readthedocs.io/en/latest/reference-core.html#nurseries-and-spawning), but returns results from a synchronous `with` block.
+`asynced` provides utilities for calling coroutines from a synchronous context. `tasks` is similar to [trio's nursery](https://trio.readthedocs.io/en/latest/reference-core.html#nurseries-and-spawning), but in a synchronous `with` block.
 
 ```python
 asynced.run(async_func, ...)  # call and run until complete
 asynced.run(async_gen, ...)  # call and run synchronous iterator
-with asynced.waiting(*fs) as tasks:  # concurrent coroutines completed in a block
-asynced.tasks(fs, timeout=...)  # mutable set of running tasks which pop as completed
+tasks = asynced.tasks(fs, timeout=...)  # mutable set of running tasks which pop as completed
+with tasks:  # wait for all tasks on exit
 ```
 
 ### extensions
