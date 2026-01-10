@@ -142,9 +142,12 @@ def test_context():
 @parametrized
 def test_tasks(coro=[threaded(**workers)(sleep), asleep]):
     tasks = coro.tasks(map(coro, delays[1:]))
-    assert next(tasks).result() == delays[-1]
+    assert tasks.pop().result() == delays[-1]
     tasks.add(coro(delays[0]))
-    assert list(tasks)[-1].result() == delays[0]
+    assert tasks.pop().result() == delays[1]
+    assert tasks.pop().result() == delays[0]
+    with pytest.raises(KeyError):
+        tasks.pop()
 
 
 def test_distributed():
@@ -169,5 +172,5 @@ def test_gevent():
     results = dict(sleep.mapzip(delays))
     assert results == dict.fromkeys(delays)
     assert list(results) == sorted(delays)
-    with pytest.raises(gevent.Timeout):
-        next(greened.tasks([sleep(1)], timeout=0))
+    tasks = greened.tasks([sleep(1)])
+    assert tasks.pop().get() is None

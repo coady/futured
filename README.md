@@ -48,7 +48,7 @@ tasks  # list of completed results
 `futured` classes provide a `tasks` interface which generalizes `futures.as_completed` and `futures.wait`, while allowing the set of tasks to be modified, e.g., for retries.
 
 ```python
-threaded.tasks(fs, timeout=...)  # mutable set of running tasks which iterate as completed
+threaded.tasks(fs, timeout=...)  # mutable set of running tasks which pop as completed
 ```
 
 ### asynced
@@ -75,7 +75,7 @@ fetch.mapzip(urls)  # generate (url, result) pairs as completed
 asynced.run(async_func, ...)  # call and run until complete
 asynced.run(async_gen, ...)  # call and run synchronous iterator
 with asynced.waiting(*fs) as tasks:  # concurrent coroutines completed in a block
-asynced.tasks(fs, timeout=...)  # mutable set of running tasks which iterate as completed
+asynced.tasks(fs, timeout=...)  # mutable set of running tasks which pop as completed
 ```
 
 ### extensions

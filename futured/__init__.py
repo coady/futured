@@ -76,31 +76,20 @@ class futured(partial):
             fs[:] = cls.results(fs, **kwargs)
 
     class tasks(set):
-        """A set of futures which iterate as completed, and can be updated while iterating."""
+        """A set of futures which tracks completion."""
 
-        TimeoutError = futures.TimeoutError
+        as_completed: Callable = NotImplemented  # type: ignore
 
         def __init__(self, fs: Iterable, *, timeout=None):
             super().__init__(fs)
             self.timeout = timeout
-            self.it = self.iter()
 
-        def wait(self, fs: list) -> Iterable:
-            return futures.wait(fs, self.timeout, return_when="FIRST_COMPLETED").done
-
-        def iter(self):
-            while self:
-                done = self.wait(list(super().__iter__()))
-                if not done:
-                    raise self.TimeoutError
-                self.difference_update(done)
-                yield from done
-
-        def __iter__(self):
-            return self
-
-        def __next__(self):
-            return next(self.it)
+        def pop(self):
+            """Remove and return next completed task."""
+            for task in self.as_completed():
+                self.remove(task)
+                return task
+            raise KeyError("pop from an empty set")
 
 
 class executed(futured):
@@ -119,6 +108,12 @@ class executed(futured):
 
     def __exit__(self, *args):
         self.func.__self__.__exit__(*args)  # type: ignore
+
+    class tasks(futured.tasks):
+        __doc__ = futured.tasks.__doc__
+
+        def as_completed(self):
+            return futures.as_completed(self, self.timeout)
 
 
 class threaded(executed):
@@ -195,18 +190,16 @@ class asynced(futured):
 
     class tasks(futured.tasks):
         __doc__ = futured.tasks.__doc__
-        TimeoutError = asyncio.TimeoutError
 
         def __init__(self, coros: Iterable, **kwargs):
             self.loop = asyncio.new_event_loop()
             super().__init__(map(self.loop.create_task, coros), **kwargs)
 
+        def as_completed(self):
+            return asynced.as_completed(self, self.loop, timeout=self.timeout)
+
         def add(self, coro):  # type: ignore
             super().add(self.loop.create_task(coro))
-
-        def wait(self, fs: list) -> Iterable:
-            coro = asyncio.wait(fs, timeout=self.timeout, return_when="FIRST_COMPLETED")
-            return self.loop.run_until_complete(coro)[0]
 
 
 with contextlib.suppress(ImportError):
@@ -234,10 +227,9 @@ with contextlib.suppress(ImportError):
 
         class tasks(futured.tasks):
             __doc__ = futured.tasks.__doc__
-            TimeoutError = gevent.Timeout
 
-            def wait(self, fs: list) -> Iterable:
-                return gevent.wait(fs, self.timeout, count=1)
+            def as_completed(self):
+                return gevent.iwait(self, self.timeout)
 
 
 class command(subprocess.Popen):
