@@ -5,7 +5,7 @@ import operator
 import os
 import subprocess
 import types
-from collections.abc import AsyncIterable, Callable, Iterable, Iterator
+from collections.abc import AsyncIterable, Callable, Collection, Iterable, Iterator
 from concurrent import futures
 from functools import partial
 from typing import Self
@@ -144,12 +144,23 @@ with contextlib.suppress(ImportError):
 class asynced(futured):
     """A partial async coroutine."""
 
+    @staticmethod
+    def as_completed(fs: Collection, loop=None, **kwargs) -> Iterator:
+        """Replaces `asyncio.as_completed`, which requires a running loop."""
+        loop = loop or asyncio.new_event_loop()
+        while fs:
+            coro = asyncio.wait(fs, return_when=asyncio.FIRST_COMPLETED, **kwargs)
+            done, fs = loop.run_until_complete(coro)
+            if not done:
+                raise asyncio.TimeoutError
+            yield from done
+
     @classmethod
     def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
-        if as_completed or kwargs:
-            return map(operator.methodcaller("result"), cls.tasks(fs, **kwargs))
         loop = asyncio.new_event_loop()
         tasks = list(map(loop.create_task, fs))
+        if as_completed or kwargs:
+            tasks = cls.as_completed(tasks, loop, **kwargs)
         return map(loop.run_until_complete, tasks)
 
     @staticmethod
@@ -211,13 +222,15 @@ with contextlib.suppress(ImportError):
 
         @classmethod
         def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
-            tasks = cls.tasks(fs, **kwargs) if (as_completed or kwargs) else list(fs)
-            return map(operator.methodcaller("get"), tasks)
+            fs = list(fs)
+            if as_completed or kwargs:
+                fs = gevent.iwait(fs, **kwargs)
+            return map(operator.methodcaller("get"), fs)
 
         @classmethod
         def items(cls, pairs: Iterable, **kwargs) -> Iterator:
             keys = dict(map(reversed, pairs))
-            return ((keys[future], future.get()) for future in cls.tasks(keys, **kwargs))
+            return ((keys[future], future.get()) for future in gevent.iwait(keys, **kwargs))
 
         class tasks(futured.tasks):
             __doc__ = futured.tasks.__doc__

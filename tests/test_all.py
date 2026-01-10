@@ -169,3 +169,5 @@ def test_gevent():
     results = dict(sleep.mapzip(delays))
     assert results == dict.fromkeys(delays)
     assert list(results) == sorted(delays)
+    with pytest.raises(gevent.Timeout):
+        next(greened.tasks([sleep(1)], timeout=0))

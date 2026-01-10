@@ -35,7 +35,6 @@ line-length = 100
 select = ["I"]
 
 [tool.ty.rules]
-unused-ignore-comment = "error"
 unresolved-import = "ignore"
 
 [tool.coverage.run]
