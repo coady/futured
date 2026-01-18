@@ -147,7 +147,7 @@ class asynced(futured):
             coro = asyncio.wait(fs, return_when=asyncio.FIRST_COMPLETED, **kwargs)
             done, fs = loop.run_until_complete(coro)
             if not done:
-                raise asyncio.TimeoutError
+                raise TimeoutError
             yield from done
 
     @classmethod
@@ -198,7 +198,7 @@ class asynced(futured):
         def as_completed(self):
             return asynced.as_completed(self, self.loop, timeout=self.timeout)
 
-        def add(self, coro):  # type: ignore
+        def add(self, coro):
             super().add(self.loop.create_task(coro))
 
 
@@ -207,6 +207,12 @@ with contextlib.suppress(ImportError):
 
     class greened(futured):
         """A partial gevent greenlet."""
+
+        @staticmethod
+        def as_completed(fs: Collection, **kwargs):
+            yield from gevent.iwait(fs, **kwargs)
+            if not all(future.ready() for future in fs):
+                raise gevent.Timeout
 
         def __new__(cls, *args, **kwargs):
             if args:
@@ -217,24 +223,19 @@ with contextlib.suppress(ImportError):
         def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
             fs = list(fs)
             if as_completed or kwargs:
-                fs = gevent.iwait(fs, **kwargs)
+                fs = cls.as_completed(fs, **kwargs)
             return map(operator.methodcaller("get"), fs)
 
         @classmethod
         def items(cls, pairs: Iterable, **kwargs) -> Iterator:
             keys = dict(map(reversed, pairs))
-            return ((keys[future], future.get()) for future in gevent.iwait(keys, **kwargs))
+            return ((keys[future], future.get()) for future in cls.as_completed(keys, **kwargs))
 
         class tasks(futured.tasks):
             __doc__ = futured.tasks.__doc__
 
             def as_completed(self):
-                count = 0
-                for task in gevent.iwait(self, self.timeout):
-                    count += 1
-                    yield task
-                if count < len(self):
-                    raise gevent.Timeout
+                return greened.as_completed(self, timeout=self.timeout)
 
 
 class command(subprocess.Popen):

@@ -78,7 +78,7 @@ def test_map(coro=[threaded(**workers)(sleep), processed(**workers)(sleep), asle
         assert list(coro.starmap((delay,) for delay in delays)) == delays
     for (key, value), delay in zip(coro.mapzip(delays), sorted(delays)):
         assert key == value == delay
-    with pytest.raises((futures.TimeoutError, asyncio.TimeoutError)):
+    with pytest.raises(TimeoutError):
         list(coro.map(delays, timeout=0))
 
 
@@ -134,12 +134,12 @@ def test_context():
         tasks.add(sleep(0))
         assert all(isinstance(task, futures.Future) for task in tasks)
     assert [task.done() for task in tasks] == [True, True]
-    with pytest.raises(futures.TimeoutError), sleep.tasks([sleep(1)], timeout=0):
+    with pytest.raises(TimeoutError), sleep.tasks([sleep(1)], timeout=0):
         ...
     with asynced.tasks([asyncio.sleep(0, result="first")]) as tasks:
         tasks.add(asyncio.sleep(0, result="second"))
     assert [task.done() for task in tasks] == [True, True]
-    with pytest.raises(futures.TimeoutError), asynced.tasks([asyncio.sleep(1)], timeout=0):
+    with pytest.raises(TimeoutError), asynced.tasks([asyncio.sleep(1)], timeout=0):
         ...
 
 
