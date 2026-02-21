@@ -253,7 +253,7 @@ class command(subprocess.Popen):
     async def coroutine(cls, *args, shell=False, **kwargs):
         """Create a subprocess coroutine, suitable for timeouts."""
         create = asyncio.create_subprocess_shell if shell else asyncio.create_subprocess_exec
-        self = await create(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)  # type: ignore
+        self = await create(*args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
         return cls.check(self, args, *(await self.communicate()))  # type: ignore
 
     def result(self, **kwargs) -> str | bytes:

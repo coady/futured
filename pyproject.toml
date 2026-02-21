@@ -32,7 +32,7 @@ Issues = "https://github.com/coady/futured/issues"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["I"]
+extend-select = ["I"]
 
 [tool.ty.rules]
 unresolved-import = "ignore"
