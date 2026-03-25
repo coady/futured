@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import functools
 import itertools
 import operator
 import os
@@ -7,16 +8,15 @@ import subprocess
 import types
 from collections.abc import AsyncIterable, Callable, Collection, Iterable, Iterator
 from concurrent import futures
-from functools import partial
 from typing import Self
 
 
-class futured(partial):
+class futured(functools.partial):
     """A partial function which returns futures."""
 
     as_completed: Callable = NotImplemented  # type: ignore
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner):  # <3.14
         return self if instance is None else types.MethodType(self, instance)
 
     @classmethod
@@ -101,7 +101,7 @@ class executed(futured):
     def __new__(cls, *args, **kwargs):
         if args:
             return futured.__new__(cls, cls.Executor().submit, *args, **kwargs)
-        return partial(futured.__new__, cls, cls.Executor(**kwargs).submit)
+        return functools.partial(futured.__new__, cls, cls.Executor(**kwargs).submit)
 
     def __enter__(self):
         return self
@@ -217,7 +217,7 @@ with contextlib.suppress(ImportError):
         def __new__(cls, *args, **kwargs):
             if args:
                 return futured.__new__(cls, gevent.spawn, *args, **kwargs)
-            return partial(futured.__new__, cls, gevent.pool.Pool(**kwargs).spawn)
+            return functools.partial(futured.__new__, cls, gevent.pool.Pool(**kwargs).spawn)
 
         @classmethod
         def results(cls, fs: Iterable, *, as_completed=False, **kwargs) -> Iterator:
