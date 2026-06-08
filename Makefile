@@ -7,4 +7,4 @@ lint:
 	uvx ty check futured
 
 html:
-	uv run --group docs mkdocs build
+	uv run --group docs great-docs build

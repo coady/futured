@@ -1,0 +1,85 @@
+# Examples
+Fetching urls concurrently, and processing the responses as completed, is used as an example. This simple task is nonetheless surprisingly tedious, especially using `asyncio`.
+
+## Threaded
+```{python}
+from concurrent import futures
+
+import httpx2 as httpx
+
+urls = [f"https://httpbin.org/delay/{d}" for d in (0.6, 0.3, 0.0)]
+
+
+def fetch_all(urls):
+    with httpx.Client() as client, futures.ThreadPoolExecutor() as executor:
+        fs = [executor.submit(client.get, url) for url in urls]
+        for future in futures.as_completed(fs):
+            yield future.result()
+
+
+for resp in fetch_all(urls):
+    print(resp.url)
+```
+
+`futured.threaded` abstracts away the boilerplate.
+
+```{python}
+from futured import threaded
+
+fetch = threaded(httpx.Client().get)
+for resp in fetch.map(urls, as_completed=True):
+    print(resp.url)
+```
+
+## Asynced
+```{python}
+#| error: true
+import asyncio
+
+
+async def fetch_all(urls):
+    async with httpx.AsyncClient() as client:
+        for future in asyncio.as_completed(map(client.get, urls)):
+            yield await future
+
+
+for resp in fetch_all(urls):
+    print(resp.url)
+```
+
+The problem is coroutines support the `yield` keyword, but only to create async iterators. Even though `asyncio.as_completed` is itself a normal iterator, there is _no way_ to write this generator as intended.
+
+Additionally there is no iterator equivalent of `loop.run_until_complete`, to mitigate the viral nature of the `async` keyword. So `futured.asynced` provides one.
+
+```{python}
+#| eval: false
+from futured import asynced
+
+for resp in asynced.run(fetch_all, urls):
+    ...
+```
+
+The alternative approach is to explicitly handle the loop in the implementation.
+
+```{python}
+def fetch_all(urls):
+    loop = asyncio.new_event_loop()
+    client = httpx.AsyncClient()
+    pending = [loop.create_task(client.get(url)) for url in urls]
+    while pending:
+        done, pending = loop.run_until_complete(
+            asyncio.wait(pending, return_when=asyncio.FIRST_COMPLETED)
+        )
+        for future in done:
+            yield future.result()
+    loop.run_until_complete(client.aclose())
+```
+
+For this case, `asynced` provides the same abstraction as `threaded`.
+
+```{python}
+#| eval: false
+fetch = asynced(httpx.AsyncClient().get)
+for resp in fetch.map(urls, as_completed=True):
+    ...
+```
