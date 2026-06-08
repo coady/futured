@@ -15,8 +15,8 @@ Futured provides a consistent interface for concurrent functional programming in
 Transform any callable into one which runs in a thread or process pool, and returns a future.
 
 ```python
+import httpx2 as httpx
 from futured import threaded, processed
-import httpx
 
 fetch = threaded(httpx.Client().get)
 fetch(url)  # return Future
@@ -49,7 +49,6 @@ The same interface works for `asyncio`.
 
 ```python
 from futured import asynced
-import httpx
 
 fetch = asynced(httpx.AsyncClient().get)
 fetch(url)  # return coroutine

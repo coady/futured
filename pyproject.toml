@@ -43,4 +43,4 @@ branch = true
 
 [dependency-groups]
 dev = ["pytest-cov", "pytest-parametrized", "gevent; python_version < '3.15'"]
-docs = ["mkdocstrings[python]", "mkdocs-jupyter", "httpx"]
+docs = ["mkdocstrings[python]", "mkdocs-jupyter", "httpx2"]
