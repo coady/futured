@@ -201,6 +201,9 @@ class asynced(futured):
         def add(self, coro):
             super().add(self.loop.create_task(coro))
 
+        def update(self, *others: Iterable):
+            super().update(map(self.loop.create_task, itertools.chain(*others)))
+
 
 with contextlib.suppress(ImportError):
     import gevent.pool

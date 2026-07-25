@@ -138,7 +138,8 @@ def test_context():
         ...
     with asynced.tasks([asyncio.sleep(0, result="first")]) as tasks:
         tasks.add(asyncio.sleep(0, result="second"))
-    assert [task.done() for task in tasks] == [True, True]
+        tasks.update([asyncio.sleep(0, result="third")])
+    assert [task.done() for task in tasks] == [True, True, True]
     with pytest.raises(TimeoutError), asynced.tasks([asyncio.sleep(1)], timeout=0):
         ...
 
