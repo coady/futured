@@ -61,7 +61,7 @@ fetch.map(urls, timeout=...)  # generate results as completed
 fetch.mapzip(urls)  # generate (url, result) pairs as completed
 ```
 
-`asynced` provides utilities for calling coroutines from a synchronous context. `tasks` is similar to [trio's nursery](https://trio.readthedocs.io/en/latest/reference-core.html#nurseries-and-spawning), but in a synchronous `with` block.
+`asynced` provides utilities for calling coroutines from a synchronous context. `tasks` is similar to [asyncio.TaskGroup](https://docs.python.org/3/library/asyncio-task.html#task-groups), but in a synchronous `with` block.
 
 ```python
 asynced.run(async_func, ...)  # call and run until complete

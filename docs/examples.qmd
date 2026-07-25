@@ -83,3 +83,32 @@ fetch = asynced(httpx.AsyncClient().get)
 for resp in fetch.map(urls, as_completed=True):
     ...
 ```
+
+## Tasks
+If we relax the `as_completed` requirement, readability is not much improved. Both
+[`asyncio.TaskGroup`](https://docs.python.org/3/library/asyncio-task.html#task-groups) and [Trio's nursery](https://trio.readthedocs.io/en/stable/tutorial.html#okay-let-s-see-something-cool-already) use _async_ context managers, so the caller still has to manage event loops.
+
+```{python}
+#| eval: false
+async def fetch_all(urls):
+    async with httpx.AsyncClient() as client, asyncio.TaskGroup() as tg:
+        return [tg.create_task(client.get(url)) for url in urls]
+
+
+tasks = asyncio.run(fetch_all(urls))
+```
+
+`asynced.tasks` provides a synchronous context manager with a simpler `set` interface.
+
+```{python}
+#| eval: false
+client = httpx.AsyncClient()
+with asynced.tasks() as tasks:
+    tasks.update(map(client.get, urls))
+```
+This example is so trivial the constructor can be in-lined.
+
+```{python}
+#| eval: false
+with asynced.tasks(map(client.get, urls)) as tasks: ...
+```
