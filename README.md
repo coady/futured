@@ -82,8 +82,8 @@ Naturally `futured` wrappers can be used as decorators, but arguments can also b
 
 ```python
 @threaded
-def slow():
-   ...
+def slow(): ...
+
 
 fetch = threaded(httpx.Client().get, url)
 fetch(params=...)
@@ -96,7 +96,8 @@ from futured import decorated
 
 FutureClient = decorated(httpx.Client, request=threaded)
 
- # equivalent to
+
+# equivalent to
 class FutureClient(httpx.Client):
     request = threaded(httpx.Client.request)
 ```

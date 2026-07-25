@@ -95,7 +95,7 @@ class futured(functools.partial):
 class executed(futured):
     """Extensible base class for callables which require a `submit` method."""
 
-    as_completed = futures.as_completed
+    as_completed = futures.as_completed  # type: ignore
     Executor = futures.Executor
 
     def __new__(cls, *args, **kwargs):
